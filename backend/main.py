@@ -4,10 +4,10 @@ Aquatic Mapping Simulation Control Panel
 Backend API Server
 """
 
-from fastapi import FastAPI, HTTPException, Depends, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Depends, Request, WebSocket, WebSocketDisconnect, Cookie
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse, JSONResponse
 import zipfile
 import tempfile
 import shutil
@@ -20,10 +20,12 @@ import json
 import subprocess
 import os
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 from pydantic import BaseModel
 import re
+import hashlib
+import uuid
 
 # Get absolute paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -54,6 +56,41 @@ USERNAME = os.environ.get("SIM_USERNAME", "bakin")
 PASSWORD = os.environ.get("SIM_PASSWORD", "ozhugu")
 
 security = HTTPBasic()
+
+# Session store (in-memory for simplicity)
+sessions = {}
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+def create_session(username: str) -> str:
+    """Create a new session and return the session ID"""
+    session_id = str(uuid.uuid4())
+    sessions[session_id] = {
+        "username": username,
+        "created_at": datetime.now(),
+        "expires_at": datetime.now() + timedelta(hours=24)
+    }
+    return session_id
+
+def verify_session(session_id: str = Cookie(None)) -> str:
+    """Verify session cookie and return username"""
+    if not session_id or session_id not in sessions:
+        raise HTTPException(
+            status_code=401,
+            detail="Not authenticated",
+        )
+
+    session = sessions[session_id]
+    if datetime.now() > session["expires_at"]:
+        del sessions[session_id]
+        raise HTTPException(
+            status_code=401,
+            detail="Session expired",
+        )
+
+    return session["username"]
 
 def verify_credentials(credentials: HTTPBasicCredentials = Depends(security)):
     correct_username = secrets.compare_digest(credentials.username, USERNAME)
@@ -191,30 +228,76 @@ manager = ConnectionManager()
 # ============================================================================
 
 @app.get("/", response_class=HTMLResponse)
-async def landing_page(request: Request):
-    """Public landing page - no auth required"""
-    return templates.TemplateResponse("landing.html", {"request": request})
+async def landing_page():
+    """Public landing page (The Desikan Chronicle) - no auth required"""
+    index_path = BASE_DIR / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path, media_type="text/html")
+    # Fallback to login if index.html doesn't exist
+    return RedirectResponse(url="/login")
 
-@app.get("/showcase", response_class=HTMLResponse)
-async def showcase_page(request: Request):
-    """Interactive showcase page with terminal emulator - no auth required"""
-    return templates.TemplateResponse("showcase.html", {"request": request})
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(session_id: str = Cookie(None)):
+    """Login page - if already authenticated, redirect to dashboard"""
+    if session_id and session_id in sessions:
+        session = sessions[session_id]
+        if datetime.now() <= session["expires_at"]:
+            return RedirectResponse(url="/dashboard")
 
-@app.get("/demo", response_class=HTMLResponse)
-async def demo_page(request: Request):
-    """Alias for showcase page"""
-    return templates.TemplateResponse("showcase.html", {"request": request})
+    login_path = TEMPLATES_DIR / "login.html"
+    if login_path.exists():
+        return FileResponse(login_path, media_type="text/html")
+    return HTMLResponse("<h1>Login page not found</h1>", status_code=404)
+
+@app.post("/api/login")
+async def login(request: LoginRequest):
+    """Handle login and create session"""
+    correct_username = secrets.compare_digest(request.username, USERNAME)
+    correct_password = secrets.compare_digest(request.password, PASSWORD)
+
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials",
+        )
+
+    session_id = create_session(request.username)
+    response = JSONResponse(
+        {"success": True, "message": "Logged in successfully"},
+        status_code=200
+    )
+    response.set_cookie(
+        key="session_id",
+        value=session_id,
+        max_age=86400,  # 24 hours
+        httponly=True,
+        samesite="lax"
+    )
+    return response
+
+@app.post("/api/logout")
+async def logout(session_id: str = Cookie(None)):
+    """Logout and invalidate session"""
+    if session_id and session_id in sessions:
+        del sessions[session_id]
+
+    response = JSONResponse(
+        {"success": True, "message": "Logged out successfully"},
+        status_code=200
+    )
+    response.delete_cookie(key="session_id")
+    return response
 
 @app.get("/dashboard", response_class=HTMLResponse)
-async def dashboard(request: Request, username: str = Depends(verify_credentials)):
-    """Protected dashboard - requires auth"""
+async def dashboard(request: Request, username: str = Depends(verify_session)):
+    """Protected dashboard - requires session auth"""
     return templates.TemplateResponse("dashboard.html", {
         "request": request,
         "username": username
     })
 
 @app.get("/api/status")
-async def get_status(username: str = Depends(verify_credentials)):
+async def get_status(username: str = Depends(verify_session)):
     """Get overall system and container status"""
     containers = get_simulation_containers()
     system = get_system_stats()
@@ -227,12 +310,12 @@ async def get_status(username: str = Depends(verify_credentials)):
     }
 
 @app.get("/api/containers")
-async def get_containers(username: str = Depends(verify_credentials)):
+async def get_containers(username: str = Depends(verify_session)):
     """Get all simulation containers"""
     return get_simulation_containers()
 
 @app.post("/api/trial/start/{trial_id}")
-async def start_trial(trial_id: int, username: str = Depends(verify_credentials)):
+async def start_trial(trial_id: int, username: str = Depends(verify_session)):
     """Start a single trial"""
     if not docker_client:
         raise HTTPException(status_code=500, detail="Docker not available. Make sure Docker is running.")
@@ -244,7 +327,7 @@ async def start_trial(trial_id: int, username: str = Depends(verify_credentials)
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/trial/stop/{trial_id}")
-async def stop_trial(trial_id: int, username: str = Depends(verify_credentials)):
+async def stop_trial(trial_id: int, username: str = Depends(verify_session)):
     """Stop a running trial"""
     try:
         container_name = f"aquatic-trial-{trial_id}"
@@ -258,7 +341,7 @@ async def stop_trial(trial_id: int, username: str = Depends(verify_credentials))
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.delete("/api/trial/{trial_id}")
-async def remove_trial(trial_id: int, username: str = Depends(verify_credentials)):
+async def remove_trial(trial_id: int, username: str = Depends(verify_session)):
     """Remove a trial container"""
     try:
         container_name = f"aquatic-trial-{trial_id}"
@@ -334,7 +417,7 @@ def get_running_trial_count():
     return len([c for c in get_simulation_containers() if c["status"] == "running"])
 
 @app.post("/api/batch/start")
-async def start_batch(batch: BatchRequest, background_tasks=None, username: str = Depends(verify_credentials)):
+async def start_batch(batch: BatchRequest, background_tasks=None, username: str = Depends(verify_session)):
     """Start a batch of trials with continuous monitoring"""
     if not docker_client:
         raise HTTPException(status_code=500, detail="Docker not available")
@@ -381,19 +464,19 @@ async def start_batch(batch: BatchRequest, background_tasks=None, username: str 
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/batch/status")
-async def get_batch_status(username: str = Depends(verify_credentials)):
+async def get_batch_status(username: str = Depends(verify_session)):
     """Get current batch status"""
     return batch_manager.get_status()
 
 @app.post("/api/batch/cancel")
-async def cancel_batch(username: str = Depends(verify_credentials)):
+async def cancel_batch(username: str = Depends(verify_session)):
     """Cancel the active batch (doesn't stop running containers)"""
     batch_manager.stop_batch()
     await manager.broadcast({"event": "batch_cancelled"})
     return {"success": True, "message": "Batch cancelled - running containers will continue"}
 
 @app.post("/api/batch/stop")
-async def stop_all(username: str = Depends(verify_credentials)):
+async def stop_all(username: str = Depends(verify_session)):
     """Stop all running trials and cancel batch"""
     try:
         # Cancel batch first
@@ -411,12 +494,12 @@ async def stop_all(username: str = Depends(verify_credentials)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/system")
-async def get_system(username: str = Depends(verify_credentials)):
+async def get_system(username: str = Depends(verify_session)):
     """Get system resource usage"""
     return get_system_stats()
 
 @app.get("/api/trials/completed")
-async def get_completed_trials(username: str = Depends(verify_credentials)):
+async def get_completed_trials(username: str = Depends(verify_session)):
     """Get list of completed trials with data"""
     data_dir = os.path.expanduser("~/workspaces/aquatic-mapping/src/sampling/data/missions")
     trials = []
@@ -446,7 +529,7 @@ async def get_completed_trials(username: str = Depends(verify_credentials)):
     return sorted(trials, key=lambda x: int(x["id"]) if x["id"].isdigit() else 0)
 
 @app.get("/api/logs/{trial_id}")
-async def get_trial_logs(trial_id: int, lines: int = 100, username: str = Depends(verify_credentials)):
+async def get_trial_logs(trial_id: int, lines: int = 100, username: str = Depends(verify_session)):
     """Get logs from a trial container"""
     try:
         container_name = f"aquatic-trial-{trial_id}"
@@ -457,7 +540,7 @@ async def get_trial_logs(trial_id: int, lines: int = 100, username: str = Depend
         raise HTTPException(status_code=404, detail=f"Trial {trial_id} not found")
 
 @app.get("/api/download/{trial_id}")
-async def download_trial_data(trial_id: int, username: str = Depends(verify_credentials)):
+async def download_trial_data(trial_id: int, username: str = Depends(verify_session)):
     """Download trial data as ZIP file"""
     data_dir = os.path.expanduser("~/workspaces/aquatic-mapping/src/sampling/data/missions")
     trial_path = os.path.join(data_dir, f"trial_{trial_id}")
@@ -484,7 +567,7 @@ async def download_trial_data(trial_id: int, username: str = Depends(verify_cred
     )
 
 @app.get("/api/trial/{trial_id}/data")
-async def get_trial_data_preview(trial_id: int, field: str = "radial", username: str = Depends(verify_credentials)):
+async def get_trial_data_preview(trial_id: int, field: str = "radial", username: str = Depends(verify_session)):
     """Get preview of trial CSV data"""
     data_dir = os.path.expanduser("~/workspaces/aquatic-mapping/src/sampling/data/missions")
     csv_path = os.path.join(data_dir, f"trial_{trial_id}", field, f"{field}_samples.csv")
@@ -504,7 +587,7 @@ async def get_trial_data_preview(trial_id: int, field: str = "radial", username:
     return {"trial_id": trial_id, "field": field, "rows": rows, "total_preview": len(rows)}
 
 @app.delete("/api/trial/{trial_id}/data")
-async def delete_trial_data(trial_id: int, username: str = Depends(verify_credentials)):
+async def delete_trial_data(trial_id: int, username: str = Depends(verify_session)):
     """Delete trial data and reconstruction results"""
     data_dir = os.path.expanduser("~/workspaces/aquatic-mapping/src/sampling/data/missions")
     trial_data_path = os.path.join(data_dir, f"trial_{trial_id}")
@@ -570,7 +653,7 @@ async def delete_trial_data(trial_id: int, username: str = Depends(verify_creden
 # ============================================================================
 
 @app.post("/api/reconstruct/{trial_id}")
-async def start_reconstruction(trial_id: int, request: ReconstructionRequest, username: str = Depends(verify_credentials)):
+async def start_reconstruction(trial_id: int, request: ReconstructionRequest, username: str = Depends(verify_session)):
     """Start GP reconstruction for a trial"""
     reconstruction_dir = os.path.expanduser("~/workspaces/aquatic-mapping/reconstruction")
     venv_python = os.path.join(reconstruction_dir, "venv", "bin", "python")
@@ -631,7 +714,7 @@ async def start_reconstruction(trial_id: int, request: ReconstructionRequest, us
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/reconstruct/{trial_id}/status")
-async def get_reconstruction_status(trial_id: int, username: str = Depends(verify_credentials)):
+async def get_reconstruction_status(trial_id: int, username: str = Depends(verify_session)):
     """Get reconstruction status for a trial"""
     if trial_id not in reconstruction_processes:
         return {"running": False, "message": "No reconstruction process found"}
@@ -674,7 +757,7 @@ async def get_reconstruction_status(trial_id: int, username: str = Depends(verif
         return status
 
 @app.get("/api/reconstruct/{trial_id}/results")
-async def get_reconstruction_results(trial_id: int, username: str = Depends(verify_credentials)):
+async def get_reconstruction_results(trial_id: int, username: str = Depends(verify_session)):
     """Get reconstruction results (metrics) for a trial"""
     results_dir = os.path.expanduser(f"~/workspaces/aquatic-mapping/reconstruction/results/trial_{trial_id}")
 
@@ -713,7 +796,7 @@ async def get_reconstruction_results(trial_id: int, username: str = Depends(veri
     return {"trial_id": trial_id, "results": results}
 
 @app.get("/api/reconstruct/{trial_id}/logs")
-async def get_reconstruction_logs(trial_id: int, username: str = Depends(verify_credentials)):
+async def get_reconstruction_logs(trial_id: int, username: str = Depends(verify_session)):
     """Get reconstruction output logs"""
     if trial_id not in reconstruction_processes:
         return {"logs": "", "running": False}
@@ -734,7 +817,7 @@ async def get_reconstruction_logs(trial_id: int, username: str = Depends(verify_
     return {"logs": logs, "running": running}
 
 @app.get("/api/reconstruct/{trial_id}/images")
-async def get_reconstruction_images(trial_id: int, username: str = Depends(verify_credentials)):
+async def get_reconstruction_images(trial_id: int, username: str = Depends(verify_session)):
     """Get list of reconstruction result images"""
     results_dir = os.path.expanduser(f"~/workspaces/aquatic-mapping/reconstruction/results/trial_{trial_id}")
 
@@ -770,7 +853,7 @@ async def get_reconstruction_image(trial_id: int, image_path: str):
     return FileResponse(full_path, media_type="image/png")
 
 @app.post("/api/reconstruct/{trial_id}/generate-heatmap")
-async def generate_comparison_heatmap(trial_id: int, username: str = Depends(verify_credentials)):
+async def generate_comparison_heatmap(trial_id: int, username: str = Depends(verify_session)):
     """Generate comparison heatmap for a trial"""
     reconstruction_dir = os.path.expanduser("~/workspaces/aquatic-mapping/reconstruction")
     venv_python = os.path.join(reconstruction_dir, "venv", "bin", "python")
@@ -822,7 +905,7 @@ async def generate_comparison_heatmap(trial_id: int, username: str = Depends(ver
 # ============================================================================
 
 @app.post("/api/host/vnc/start")
-async def start_host_vnc(username: str = Depends(verify_credentials)):
+async def start_host_vnc(username: str = Depends(verify_session)):
     """Start VNC server with noVNC web access for remote desktop"""
     scripts_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "scripts")
     start_script = os.path.join(scripts_dir, "start-remote-desktop.sh")
@@ -899,7 +982,7 @@ async def start_host_vnc(username: str = Depends(verify_credentials)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/host/vnc/stop")
-async def stop_host_vnc(username: str = Depends(verify_credentials)):
+async def stop_host_vnc(username: str = Depends(verify_session)):
     """Stop the host VNC and noVNC servers"""
     scripts_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "scripts")
     stop_script = os.path.join(scripts_dir, "stop-remote-desktop.sh")
@@ -914,7 +997,7 @@ async def stop_host_vnc(username: str = Depends(verify_credentials)):
     return {"success": True, "message": "Remote desktop stopped"}
 
 @app.get("/api/host/vnc/status")
-async def get_host_vnc_status(username: str = Depends(verify_credentials)):
+async def get_host_vnc_status(username: str = Depends(verify_session)):
     """Get host VNC and noVNC server status"""
     x11vnc_running = subprocess.run(["pgrep", "-f", "x11vnc.*-rfbport 5900"],
                                      capture_output=True).returncode == 0
