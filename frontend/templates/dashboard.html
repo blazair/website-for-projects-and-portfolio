@@ -123,22 +123,6 @@
 
         .dot.pulse { animation: pulse 2s infinite; }
 
-        .logout-btn {
-            padding: 4px 10px;
-            font-size: 11px;
-            background: transparent;
-            color: var(--text-dim);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .logout-btn:hover {
-            color: var(--red);
-            border-color: var(--red);
-        }
-
         /* Main Layout */
         .main {
             padding: 20px;
@@ -699,7 +683,6 @@
                 <span class="dot" :class="connected ? 'pulse' : 'offline'"></span>
                 <span x-text="connected ? 'online' : 'offline'"></span>
             </div>
-            <button @click="logout()" class="logout-btn">logout</button>
         </div>
     </header>
 
@@ -1503,21 +1486,6 @@
                 notify(type, message) {
                     this.notifications.push({ type, message });
                     setTimeout(() => this.notifications.shift(), 3000);
-                },
-
-                async logout() {
-                    if (confirm('logout?')) {
-                        try {
-                            await fetch('/api/logout', {
-                                method: 'POST',
-                                credentials: 'include'
-                            });
-                            window.location.href = '/login';
-                        } catch (e) {
-                            console.error('logout failed:', e);
-                            window.location.href = '/login';
-                        }
-                    }
                 }
             }
         }

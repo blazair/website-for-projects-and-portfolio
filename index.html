@@ -1090,7 +1090,7 @@
                             <span class="project-tag">PX4</span>
                         </div>
                         <div class="btn-row">
-                            <a href="/dashboard" class="btn btn-primary">Live Dashboard</a>
+                            <a href="/dashboard" class="btn btn-primary" id="dashboardBtn" onclick="return checkDashboard(event)">Live Dashboard</a>
                             <a href="https://github.com/DREAMS-lab/aquatic-mapping" target="_blank" class="btn">GitHub</a>
                         </div>
                     </div>
@@ -1457,6 +1457,40 @@
                 ease: 'power2.out'
             });
         });
+
+        // ========================================
+        // DASHBOARD OFFLINE CHECK
+        // ========================================
+        async function checkDashboard(event) {
+            event.preventDefault();
+            const btn = document.getElementById('dashboardBtn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Checking...';
+            btn.style.pointerEvents = 'none';
+
+            try {
+                const response = await fetch('/api/status', {
+                    method: 'GET',
+                    credentials: 'include',
+                    signal: AbortSignal.timeout(5000)
+                });
+
+                if (response.status === 401) {
+                    // Auth required - backend is running, redirect to dashboard
+                    window.location.href = '/dashboard';
+                } else if (response.ok) {
+                    window.location.href = '/dashboard';
+                } else {
+                    alert('Host PC is offline. Please start the backend server.');
+                    btn.textContent = originalText;
+                    btn.style.pointerEvents = '';
+                }
+            } catch (error) {
+                alert('Host PC is offline. The control panel is only available when the backend server is running.');
+                btn.textContent = originalText;
+                btn.style.pointerEvents = '';
+            }
+        }
     </script>
 </body>
 </html>
