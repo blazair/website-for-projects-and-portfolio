@@ -1047,9 +1047,7 @@
                         <span class="pdf-title">Paper Preview</span>
                         <a href="/static/icra-paper.pdf" download class="pdf-download">Download PDF</a>
                     </div>
-                    <object data="/static/icra-paper.pdf" type="application/pdf" class="pdf-viewer">
-                        <p>PDF cannot be displayed. <a href="/static/icra-paper.pdf" target="_blank">Click here to view the paper</a></p>
-                    </object>
+                    <embed src="/static/icra-paper.pdf" type="application/pdf" class="pdf-viewer">
                 </div>
             </div>
         </div>
@@ -1469,17 +1467,15 @@
             btn.style.pointerEvents = 'none';
 
             try {
-                const response = await fetch('/api/status', {
+                // Use health endpoint (no auth required) to check if backend is online
+                const response = await fetch('/api/health', {
                     method: 'GET',
-                    credentials: 'include',
                     signal: AbortSignal.timeout(5000)
                 });
 
-                if (response.status === 401) {
-                    // Auth required - backend is running, redirect to dashboard
-                    window.location.href = '/dashboard';
-                } else if (response.ok) {
-                    window.location.href = '/dashboard';
+                if (response.ok) {
+                    // Backend is online - redirect to login page
+                    window.location.href = '/login';
                 } else {
                     alert('Host PC is offline. Please start the backend server.');
                     btn.textContent = originalText;

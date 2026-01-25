@@ -661,7 +661,7 @@
     <header class="header">
         <div class="header-left">
             <div>
-                <span class="prompt">{{ username }}@control</span>
+                <span class="prompt" x-text="(sessionStorage.getItem('username') || 'user') + '@control'">user@control</span>
                 <span class="prompt-path">~/aquatic-mapping</span>
                 <span style="color: var(--text);">$</span>
             </div>
@@ -683,6 +683,9 @@
                 <span class="dot" :class="connected ? 'pulse' : 'offline'"></span>
                 <span x-text="connected ? 'online' : 'offline'"></span>
             </div>
+            <button @click="logout()" class="btn btn-sm" style="margin-left: 10px;">
+                <i class="fas fa-sign-out-alt"></i> logout
+            </button>
         </div>
     </header>
 
@@ -1157,6 +1160,26 @@
                 hostVncRunning: false,
                 hostVncStatus: { x11vnc: false, novnc: false },
 
+                // Auth helper - get authorization header
+                getAuthHeader() {
+                    const auth = sessionStorage.getItem('auth');
+                    return auth ? { 'Authorization': 'Basic ' + auth } : {};
+                },
+
+                // Authenticated fetch wrapper
+                async authFetch(url, options = {}) {
+                    const headers = { ...options.headers, ...this.getAuthHeader() };
+                    const response = await fetch(url, { ...options, headers });
+                    if (response.status === 401) {
+                        // Not authenticated, redirect to login
+                        sessionStorage.removeItem('auth');
+                        sessionStorage.removeItem('username');
+                        window.location.href = '/login';
+                        throw new Error('Unauthorized');
+                    }
+                    return response;
+                },
+
                 get filteredResults() {
                     return this.reconResults.filter(r => {
                         if (this.filterField !== 'all' && r.field !== this.filterField) return false;
@@ -1184,6 +1207,11 @@
                 },
 
                 init() {
+                    // Check if authenticated
+                    if (!sessionStorage.getItem('auth')) {
+                        window.location.href = '/login';
+                        return;
+                    }
                     this.connectWebSocket();
                     this.refreshStatus();
                     this.loadCompletedTrials().then(() => {
@@ -1206,16 +1234,20 @@
 
                 async refreshStatus() {
                     try {
-                        const response = await fetch('/api/status', { credentials: 'include' });
+                        const response = await this.authFetch('/api/status');
                         const data = await response.json();
                         this.containers = data.containers;
                         this.system = data.system;
-                    } catch (e) { console.error(e); }
+                        this.connected = true;
+                    } catch (e) {
+                        console.error(e);
+                        this.connected = false;
+                    }
                 },
 
                 async loadCompletedTrials() {
                     try {
-                        const response = await fetch('/api/trials/completed', { credentials: 'include' });
+                        const response = await this.authFetch('/api/trials/completed');
                         this.completedTrials = await response.json();
                         if (this.completedTrials.length > 0) this.reconTrial = this.completedTrials[0].id;
                         return this.completedTrials;
@@ -1225,10 +1257,9 @@
                 async startBatch() {
                     this.loading = true;
                     try {
-                        const response = await fetch('/api/batch/start', {
+                        const response = await this.authFetch('/api/batch/start', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
                             body: JSON.stringify({ start_trial: parseInt(this.batchStart), end_trial: parseInt(this.batchEnd), concurrent: parseInt(this.concurrent) })
                         });
                         const data = await response.json();
@@ -1242,7 +1273,7 @@
                     const trialId = prompt('enter trial number:');
                     if (trialId) {
                         try {
-                            await fetch(`/api/trial/start/${trialId}`, { method: 'POST', credentials: 'include' });
+                            await this.authFetch(`/api/trial/start/${trialId}`, { method: 'POST' });
                             this.notify('success', `trial ${trialId} started`);
                             this.refreshStatus();
                         } catch (e) { this.notify('error', 'failed to start trial'); }
@@ -1251,7 +1282,7 @@
 
                 async stopTrial(trialId) {
                     try {
-                        await fetch(`/api/trial/stop/${trialId}`, { method: 'POST', credentials: 'include' });
+                        await this.authFetch(`/api/trial/stop/${trialId}`, { method: 'POST' });
                         this.notify('success', `trial ${trialId} stopped`);
                         this.refreshStatus();
                     } catch (e) { this.notify('error', 'failed to stop trial'); }
@@ -1259,7 +1290,7 @@
 
                 async removeTrial(trialId) {
                     try {
-                        await fetch(`/api/trial/${trialId}`, { method: 'DELETE', credentials: 'include' });
+                        await this.authFetch(`/api/trial/${trialId}`, { method: 'DELETE' });
                         this.notify('success', `trial ${trialId} removed`);
                         this.refreshStatus();
                     } catch (e) { this.notify('error', 'failed to remove trial'); }
@@ -1284,7 +1315,7 @@
                 async stopAll() {
                     if (confirm('stop all running trials?')) {
                         try {
-                            await fetch('/api/batch/stop', { method: 'POST', credentials: 'include' });
+                            await this.authFetch('/api/batch/stop', { method: 'POST' });
                             this.notify('success', 'all trials stopped');
                             this.refreshStatus();
                         } catch (e) { this.notify('error', 'failed to stop trials'); }
@@ -1301,10 +1332,9 @@
                     this.reconResults = [];
                     this.reconError = null;
                     try {
-                        const response = await fetch(`/api/reconstruct/${this.reconTrial}`, {
+                        const response = await this.authFetch(`/api/reconstruct/${this.reconTrial}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            credentials: 'include',
                             body: JSON.stringify({ field: 'all', method: 'all' })
                         });
                         const data = await response.json();
@@ -1324,7 +1354,7 @@
                 async pollReconstructionStatus() {
                     const poll = async () => {
                         try {
-                            const response = await fetch(`/api/reconstruct/${this.reconTrial}/status`, { credentials: 'include' });
+                            const response = await this.authFetch(`/api/reconstruct/${this.reconTrial}/status`);
                             const data = await response.json();
                             if (data.running) {
                                 setTimeout(poll, 2000);
@@ -1348,7 +1378,7 @@
 
                 async loadReconstructionResults() {
                     try {
-                        const response = await fetch(`/api/reconstruct/${this.reconTrial}/results`, { credentials: 'include' });
+                        const response = await this.authFetch(`/api/reconstruct/${this.reconTrial}/results`);
                         if (response.ok) {
                             const data = await response.json();
                             this.reconResults = data.results || [];
@@ -1369,7 +1399,7 @@
 
                 async loadReconstructionImages() {
                     try {
-                        const response = await fetch(`/api/reconstruct/${this.reconTrial}/images`, { credentials: 'include' });
+                        const response = await this.authFetch(`/api/reconstruct/${this.reconTrial}/images`);
                         if (response.ok) {
                             const data = await response.json();
                             this.reconImages = data.images || [];
@@ -1385,7 +1415,7 @@
                     if (!this.reconTrial) return;
                     this.reconError = null;
                     try {
-                        const response = await fetch(`/api/reconstruct/${this.reconTrial}/results`, { credentials: 'include' });
+                        const response = await this.authFetch(`/api/reconstruct/${this.reconTrial}/results`);
                         if (response.ok) {
                             const data = await response.json();
                             this.reconResults = data.results || [];
@@ -1403,7 +1433,7 @@
                     if (this.reconResults.length === 0) return;
                     this.reconRunning = true;
                     try {
-                        const response = await fetch(`/api/reconstruct/${this.reconTrial}/generate-heatmap`, { method: 'POST', credentials: 'include' });
+                        const response = await this.authFetch(`/api/reconstruct/${this.reconTrial}/generate-heatmap`, { method: 'POST' });
                         const data = await response.json();
                         if (data.success) {
                             this.notify('success', 'heatmap generated');
@@ -1430,7 +1460,7 @@
                 async deleteTrialData() {
                     if (!confirm(`delete all data for trial ${this.reconTrial}?`)) return;
                     try {
-                        const response = await fetch(`/api/trial/${this.reconTrial}/data`, { method: 'DELETE', credentials: 'include' });
+                        const response = await this.authFetch(`/api/trial/${this.reconTrial}/data`, { method: 'DELETE' });
                         const data = await response.json();
                         if (data.success) {
                             this.notify('success', 'trial deleted');
@@ -1452,7 +1482,7 @@
 
                 async startHostVNC() {
                     try {
-                        const response = await fetch('/api/host/vnc/start', { method: 'POST', credentials: 'include' });
+                        const response = await this.authFetch('/api/host/vnc/start', { method: 'POST' });
                         const data = await response.json();
                         if (data.success) {
                             this.hostVncRunning = true;
@@ -1465,7 +1495,7 @@
 
                 async stopHostVNC() {
                     try {
-                        await fetch('/api/host/vnc/stop', { method: 'POST', credentials: 'include' });
+                        await this.authFetch('/api/host/vnc/stop', { method: 'POST' });
                         this.hostVncRunning = false;
                         this.notify('success', 'vnc stopped');
                     } catch (e) { this.notify('error', 'failed to stop vnc'); }
@@ -1473,7 +1503,7 @@
 
                 async checkHostVncStatus() {
                     try {
-                        const response = await fetch('/api/host/vnc/status', { credentials: 'include' });
+                        const response = await this.authFetch('/api/host/vnc/status');
                         const data = await response.json();
                         this.hostVncRunning = data.running;
                         this.hostVncStatus = { x11vnc: data.x11vnc_running || false, novnc: data.novnc_running || false };
@@ -1486,6 +1516,12 @@
                 notify(type, message) {
                     this.notifications.push({ type, message });
                     setTimeout(() => this.notifications.shift(), 3000);
+                },
+
+                logout() {
+                    sessionStorage.removeItem('auth');
+                    sessionStorage.removeItem('username');
+                    window.location.href = '/login';
                 }
             }
         }

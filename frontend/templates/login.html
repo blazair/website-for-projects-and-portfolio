@@ -271,18 +271,21 @@
             form.classList.add('loading');
 
             try {
+                // Validate credentials via API
                 const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    credentials: 'include',
                     body: JSON.stringify({ username, password })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
+                    // Store credentials for dashboard to use
+                    sessionStorage.setItem('auth', btoa(username + ':' + password));
+                    sessionStorage.setItem('username', username);
                     // Redirect to dashboard
                     window.location.href = '/dashboard';
                 } else {
@@ -291,10 +294,15 @@
                     form.classList.remove('loading');
                 }
             } catch (error) {
-                showError('Connection error. Please try again.');
+                showError('Connection error. Host PC may be offline.');
                 submitBtn.disabled = false;
                 form.classList.remove('loading');
             }
+        }
+
+        // Check if already authenticated
+        if (sessionStorage.getItem('auth')) {
+            window.location.href = '/dashboard';
         }
 
         // Auto-focus username field
