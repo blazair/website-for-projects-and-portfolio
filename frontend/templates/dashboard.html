@@ -3,72 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Chronicle - Control Room</title>
+    <title>Terminal - Control Panel</title>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --paper: #f4ead5;
-            --paper-cream: #faf6eb;
-            --paper-aged: #e8dcc4;
-            --paper-dark: #d9ccb4;
-            --ink: #1a1a1a;
-            --ink-light: #3d3d3d;
-            --ink-faded: #6a6a6a;
-            --olive: #4a5d23;
-            --olive-dark: #3a4a1c;
-            --olive-light: #5a6d33;
-            --orange: #c4640c;
-            --rust: #8b4513;
-            --aqua: #2a6a6a;
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --bg: #0a0e14;
+            --bg-light: #141920;
+            --bg-lighter: #1a1f29;
+            --border: #1f2430;
+            --text: #c5c8c6;
+            --text-dim: #6c7680;
+            --accent: #00ff9f;
+            --accent-dim: #00cc7f;
+            --red: #ff3333;
+            --yellow: #ffb454;
+            --blue: #59c2ff;
+            --purple: #c678dd;
+        }
+
         [x-cloak] { display: none !important; }
 
         body {
-            font-family: 'EB Garamond', Georgia, serif;
-            background: var(--paper);
-            color: var(--ink);
-            font-size: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 13px;
             line-height: 1.5;
             min-height: 100vh;
         }
 
-        /* Paper texture */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            opacity: 0.03;
-            pointer-events: none;
-            z-index: 9999;
-        }
-
-        /* ========================================
-           HEADER
-           ======================================== */
+        /* Terminal Header */
         .header {
-            background: var(--ink);
-            color: var(--paper);
-            padding: 15px 0;
-            border-bottom: 3px solid var(--olive);
-        }
-
-        .header-inner {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 30px;
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .header-left {
@@ -77,45 +59,25 @@
             gap: 20px;
         }
 
-        .back-link {
-            color: var(--paper-aged);
-            text-decoration: none;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: color 0.2s;
+        .prompt {
+            color: var(--accent);
+            font-weight: 600;
         }
 
-        .back-link:hover {
-            color: var(--paper);
-        }
-
-        .header-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: 0.02em;
-        }
-
-        .header-title span {
-            color: var(--olive-light);
-            font-style: italic;
-            font-weight: 400;
+        .prompt-path {
+            color: var(--blue);
         }
 
         .header-nav {
             display: flex;
-            gap: 5px;
+            gap: 8px;
         }
 
         .tab-btn {
-            padding: 8px 16px;
-            font-family: 'EB Garamond', serif;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--paper-aged);
+            padding: 6px 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-dim);
             background: transparent;
             border: 1px solid transparent;
             cursor: pointer;
@@ -123,370 +85,382 @@
         }
 
         .tab-btn:hover {
-            color: var(--paper);
+            color: var(--accent);
+            background: var(--bg-lighter);
         }
 
         .tab-btn.active {
-            background: var(--olive);
-            color: var(--paper);
-            border-color: var(--olive);
+            color: var(--accent);
+            border-color: var(--accent);
         }
 
-        .header-status {
+        .header-right {
             display: flex;
             align-items: center;
             gap: 15px;
-            font-size: 12px;
+            font-size: 11px;
         }
 
-        .status-dot {
+        .status-indicator {
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
         .dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            background: var(--olive-light);
+            background: var(--accent);
         }
 
-        .dot.offline { background: var(--rust); }
+        .dot.offline { background: var(--red); }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.4; }
         }
 
         .dot.pulse { animation: pulse 2s infinite; }
 
-        /* ========================================
-           MAIN LAYOUT
-           ======================================== */
-        .main {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 25px 30px;
+        .logout-btn {
+            padding: 4px 10px;
+            font-size: 11px;
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        /* ========================================
-           SYSTEM STATS BAR
-           ======================================== */
+        .logout-btn:hover {
+            color: var(--red);
+            border-color: var(--red);
+        }
+
+        /* Main Layout */
+        .main {
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* System Stats Bar */
         .stats-bar {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
         .stat-card {
-            background: var(--paper-cream);
-            border: 2px solid var(--ink);
-            padding: 15px 18px;
-        }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            padding: 12px 16px;
         }
 
         .stat-label {
-            font-size: 11px;
+            font-size: 10px;
+            color: var(--text-dim);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--ink-faded);
-        }
-
-        .stat-icon {
-            font-size: 14px;
-            color: var(--olive);
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
         }
 
         .stat-value {
-            font-family: 'Playfair Display', serif;
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--ink);
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--accent);
             margin-bottom: 8px;
         }
 
         .stat-bar {
-            height: 4px;
-            background: var(--paper-dark);
-            border-radius: 2px;
+            height: 2px;
+            background: var(--bg);
+            border-radius: 1px;
             overflow: hidden;
         }
 
         .stat-fill {
             height: 100%;
-            background: var(--olive);
+            background: var(--accent);
             transition: width 0.5s ease;
         }
 
-        /* ========================================
-           CARDS
-           ======================================== */
-        .card {
-            background: var(--paper-cream);
-            border: 2px solid var(--ink);
+        /* Terminal Panel */
+        .panel {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
         }
 
-        .card-header {
-            padding: 12px 18px;
-            border-bottom: 2px solid var(--ink);
+        .panel-header {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: var(--paper);
         }
 
-        .card-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 14px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .panel-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .card-title i {
-            color: var(--olive);
-        }
-
-        .card-badge {
+        .panel-title i {
+            color: var(--accent);
             font-size: 11px;
-            padding: 3px 8px;
-            background: var(--ink);
-            color: var(--paper);
         }
 
-        .card-body {
-            padding: 18px;
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 10px;
+            background: var(--bg);
+            color: var(--accent);
+            border: 1px solid var(--accent);
         }
 
-        /* ========================================
-           FORMS & INPUTS
-           ======================================== */
-        .form-group {
-            margin-bottom: 15px;
+        .panel-body {
+            padding: 16px;
         }
 
-        .form-label {
-            display: block;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--ink-faded);
-            margin-bottom: 6px;
+        /* Grid Layouts */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 280px 1fr 1fr;
+            gap: 16px;
         }
 
-        .form-input {
-            width: 100%;
-            padding: 10px 12px;
-            font-family: 'EB Garamond', serif;
-            font-size: 15px;
-            background: var(--paper);
-            border: 1px solid var(--ink-faded);
-            color: var(--ink);
-            transition: border-color 0.2s;
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
         }
 
-        .form-input:focus {
-            outline: none;
-            border-color: var(--olive);
-        }
-
-        .form-select {
-            width: 100%;
-            padding: 10px 12px;
-            font-family: 'EB Garamond', serif;
-            font-size: 15px;
-            background: var(--paper);
-            border: 1px solid var(--ink-faded);
-            color: var(--ink);
-            cursor: pointer;
-        }
-
-        .form-range {
-            width: 100%;
-            -webkit-appearance: none;
-            height: 4px;
-            background: var(--paper-dark);
-            border-radius: 2px;
-            margin-top: 8px;
-        }
-
-        .form-range::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: var(--olive);
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        /* ========================================
-           BUTTONS
-           ======================================== */
+        /* Buttons */
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 10px 16px;
-            font-family: 'EB Garamond', serif;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border: 2px solid var(--ink);
-            background: var(--paper);
-            color: var(--ink);
+            gap: 6px;
+            padding: 8px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
             cursor: pointer;
-            transition: all 0.15s;
-            text-decoration: none;
+            transition: all 0.2s;
         }
 
         .btn:hover {
-            background: var(--ink);
-            color: var(--paper);
+            border-color: var(--accent);
+            color: var(--accent);
         }
 
         .btn-primary {
-            background: var(--olive);
-            border-color: var(--olive);
-            color: var(--paper);
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
         }
 
         .btn-primary:hover {
-            background: var(--olive-dark);
-            border-color: var(--olive-dark);
+            background: var(--accent-dim);
+            border-color: var(--accent-dim);
         }
 
         .btn-danger {
-            background: var(--paper);
-            border-color: var(--rust);
-            color: var(--rust);
+            border-color: var(--red);
+            color: var(--red);
         }
 
         .btn-danger:hover {
-            background: var(--rust);
-            color: var(--paper);
+            background: var(--red);
+            color: var(--bg);
         }
 
         .btn-sm {
-            padding: 6px 10px;
-            font-size: 11px;
+            padding: 4px 8px;
+            font-size: 10px;
         }
 
         .btn-block {
             width: 100%;
         }
 
-        /* ========================================
-           GRID LAYOUTS
-           ======================================== */
-        .grid-3 {
-            display: grid;
-            grid-template-columns: 280px 1fr 1fr;
-            gap: 20px;
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
         }
 
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        /* Forms */
+        .form-group {
+            margin-bottom: 12px;
         }
 
-        .space-y > * + * {
-            margin-top: 15px;
+        .form-label {
+            display: block;
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
         }
 
-        /* ========================================
-           TRIAL ITEMS
-           ======================================== */
+        .form-input, .form-select {
+            width: 100%;
+            padding: 8px 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-range {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 2px;
+            background: var(--bg);
+            border-radius: 1px;
+            margin-top: 8px;
+        }
+
+        .form-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        /* Trial Items */
         .trial-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 15px;
-            background: var(--paper);
-            border: 1px solid var(--ink-faded);
-            margin-bottom: 10px;
+            padding: 10px 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+
+        .trial-item:hover {
+            border-color: var(--accent);
         }
 
         .trial-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .trial-icon {
-            width: 36px;
-            height: 36px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--paper-aged);
-            border: 1px solid var(--ink-faded);
+            background: var(--bg-lighter);
+            color: var(--text-dim);
+            font-size: 12px;
         }
 
         .trial-icon.running {
-            background: var(--olive);
-            border-color: var(--olive);
-            color: var(--paper);
+            background: var(--accent);
+            color: var(--bg);
         }
 
         .trial-name {
-            font-family: 'Playfair Display', serif;
             font-weight: 600;
+            color: var(--text);
         }
 
         .trial-status {
-            font-size: 11px;
+            font-size: 10px;
+            color: var(--text-dim);
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        .trial-status.running { color: var(--olive); }
-        .trial-status.exited { color: var(--ink-faded); }
+        .trial-status.running { color: var(--accent); }
 
         .trial-actions {
             display: flex;
-            gap: 6px;
+            gap: 4px;
         }
 
-        .trial-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px dashed var(--ink-faded);
+        /* Table */
+        .table-wrap {
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
-        .trial-stat-label {
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        th {
+            text-align: left;
+            padding: 8px 10px;
             font-size: 10px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--ink-faded);
-            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            position: sticky;
+            top: 0;
         }
 
-        /* ========================================
-           FILTERS - INLINE COMPACT
-           ======================================== */
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover td {
+            background: var(--bg);
+        }
+
+        .badge-method {
+            padding: 2px 6px;
+            font-size: 9px;
+            border: 1px solid;
+        }
+
+        .badge-blue { border-color: var(--blue); color: var(--blue); }
+        .badge-purple { border-color: var(--purple); color: var(--purple); }
+        .badge-yellow { border-color: var(--yellow); color: var(--yellow); }
+
+        .text-best {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Filters */
         .filters-inline {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             align-items: flex-end;
-            padding: 15px 18px;
-            background: var(--paper);
-            border-bottom: 1px solid var(--ink-faded);
+            padding: 12px 16px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
         }
 
         .filter-group {
@@ -497,103 +471,64 @@
             display: block;
             font-size: 9px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--ink-faded);
+            color: var(--text-dim);
             margin-bottom: 4px;
         }
 
         .filter-group select {
             width: 100%;
-            padding: 8px 10px;
-            font-family: 'EB Garamond', serif;
-            font-size: 13px;
-            background: var(--paper-cream);
-            border: 1px solid var(--ink-faded);
-            color: var(--ink);
+            padding: 6px 8px;
+            font-size: 11px;
         }
 
-        /* ========================================
-           TABLE
-           ======================================== */
-        .table-wrap {
-            overflow-x: auto;
-            max-height: 350px;
-            overflow-y: auto;
+        /* Summary Boxes */
+        .summary-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
+        .summary-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: center;
         }
 
-        th {
-            text-align: left;
-            padding: 10px 12px;
-            font-size: 10px;
+        .summary-label {
+            font-size: 9px;
+            color: var(--text-dim);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--ink-faded);
-            border-bottom: 2px solid var(--ink);
-            background: var(--paper);
-            position: sticky;
-            top: 0;
+            margin-bottom: 4px;
         }
 
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid var(--paper-dark);
-        }
-
-        tr:hover td {
-            background: var(--paper);
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 3px 8px;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-blue { background: var(--aqua); color: var(--paper); }
-        .badge-orange { background: var(--orange); color: var(--paper); }
-        .badge-olive { background: var(--olive); color: var(--paper); }
-
-        .text-mono {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-        }
-
-        .text-best {
-            color: var(--olive);
+        .summary-value {
+            font-size: 18px;
             font-weight: 600;
+            color: var(--accent);
         }
 
-        /* ========================================
-           IMAGE GRID
-           ======================================== */
+        /* Image Grid */
         .image-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
             max-height: 300px;
             overflow-y: auto;
-            padding: 15px;
+            padding: 12px;
         }
 
         .image-card {
             aspect-ratio: 1;
-            border: 1px solid var(--ink-faded);
+            border: 1px solid var(--border);
             overflow: hidden;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .image-card:hover {
-            border-color: var(--olive);
-            transform: scale(1.02);
+            border-color: var(--accent);
         }
 
         .image-card img {
@@ -602,60 +537,11 @@
             object-fit: cover;
         }
 
-        /* ========================================
-           SUMMARY BOXES
-           ======================================== */
-        .summary-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 15px;
-        }
-
-        .summary-box {
-            background: var(--paper);
-            border: 1px solid var(--ink-faded);
-            padding: 12px;
-            text-align: center;
-        }
-
-        .summary-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--ink-faded);
-            margin-bottom: 5px;
-        }
-
-        .summary-value {
-            font-family: 'Playfair Display', serif;
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--olive);
-        }
-
-        /* ========================================
-           EMPTY STATE
-           ======================================== */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--ink-faded);
-        }
-
-        .empty-state i {
-            font-size: 40px;
-            margin-bottom: 12px;
-            opacity: 0.3;
-        }
-
-        /* ========================================
-           MODAL
-           ======================================== */
+        /* Modal */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(26, 26, 26, 0.95);
+            background: rgba(10, 14, 20, 0.95);
             z-index: 10000;
             display: flex;
             align-items: center;
@@ -666,21 +552,19 @@
         .modal-overlay img {
             max-width: 100%;
             max-height: 100%;
-            border: 3px solid var(--paper);
+            border: 1px solid var(--border);
         }
 
         .modal-close {
             position: absolute;
             top: 20px;
             right: 20px;
-            color: var(--paper);
+            color: var(--text);
             font-size: 24px;
             cursor: pointer;
         }
 
-        /* ========================================
-           TOAST
-           ======================================== */
+        /* Toast */
         .toast-container {
             position: fixed;
             bottom: 20px;
@@ -689,50 +573,60 @@
         }
 
         .toast {
-            background: var(--ink);
-            color: var(--paper);
-            padding: 12px 18px;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 16px;
             margin-top: 8px;
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 13px;
-            border-left: 3px solid var(--olive);
+            font-size: 11px;
         }
 
-        .toast.error { border-left-color: var(--rust); }
-        .toast.success { border-left-color: var(--olive); }
+        .toast.error { border-color: var(--red); }
+        .toast.success { border-color: var(--accent); }
 
-        /* ========================================
-           HOST PC TAB
-           ======================================== */
+        .toast i {
+            color: var(--accent);
+        }
+
+        .toast.error i { color: var(--red); }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-dim);
+        }
+
+        .empty-state i {
+            font-size: 32px;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+
+        /* VNC Status Grid */
         .vnc-status-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         .vnc-status-item {
-            background: var(--paper);
-            border: 1px solid var(--ink-faded);
-            padding: 12px;
-        }
-
-        .vnc-status-item .dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 6px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 10px;
+            font-size: 11px;
         }
 
         .info-row {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px dashed var(--ink-faded);
-            font-size: 14px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
         }
 
         .info-row:last-child {
@@ -740,12 +634,10 @@
         }
 
         .info-label {
-            color: var(--ink-faded);
+            color: var(--text-dim);
         }
 
-        /* ========================================
-           RESPONSIVE
-           ======================================== */
+        /* Responsive */
         @media (max-width: 1100px) {
             .grid-3 {
                 grid-template-columns: 260px 1fr;
@@ -765,59 +657,49 @@
                 grid-template-columns: 1fr 1fr;
             }
 
-            .header-inner {
+            .header {
                 flex-direction: column;
-                gap: 15px;
+                gap: 12px;
             }
 
             .header-nav {
                 flex-wrap: wrap;
-                justify-content: center;
             }
 
             .filters-inline {
                 flex-wrap: wrap;
             }
-
-            .filter-group {
-                flex: 1 1 45%;
-            }
         }
     </style>
 </head>
 <body x-data="dashboard()" x-init="init()">
-    <!-- Header -->
+    <!-- Terminal Header -->
     <header class="header">
-        <div class="header-inner">
-            <div class="header-left">
-                <a href="/" class="back-link">
-                    <i class="fas fa-arrow-left"></i> Chronicle
-                </a>
-                <h1 class="header-title">Control Room <span>Field Reconstruction</span></h1>
+        <div class="header-left">
+            <div>
+                <span class="prompt">{{ username }}@control</span>
+                <span class="prompt-path">~/aquatic-mapping</span>
+                <span style="color: var(--text);">$</span>
             </div>
-
             <nav class="header-nav">
                 <button @click="currentTab = 'simulations'" :class="currentTab === 'simulations' ? 'active' : ''" class="tab-btn">
-                    <i class="fas fa-flask"></i> Simulations
+                    simulations
                 </button>
                 <button @click="currentTab = 'reconstruction'" :class="currentTab === 'reconstruction' ? 'active' : ''" class="tab-btn">
-                    <i class="fas fa-chart-area"></i> Reconstruction
+                    reconstruction
                 </button>
                 <button @click="currentTab = 'host'" :class="currentTab === 'host' ? 'active' : ''" class="tab-btn">
-                    <i class="fas fa-desktop"></i> Host PC
+                    host
                 </button>
             </nav>
+        </div>
 
-            <div class="header-status">
-                <div class="status-dot">
-                    <span class="dot" :class="connected ? 'pulse' : 'offline'"></span>
-                    <span x-text="connected ? 'Live' : 'Offline'"></span>
-                </div>
-                <span style="color: var(--paper-aged)"><i class="fas fa-user"></i> {{ username }}</span>
-                <button @click="logout()" class="btn btn-sm" style="padding: 6px 12px; margin-left: 15px; border-color: var(--paper-aged); color: var(--paper-aged);">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
+        <div class="header-right">
+            <div class="status-indicator">
+                <span class="dot" :class="connected ? 'pulse' : 'offline'"></span>
+                <span x-text="connected ? 'online' : 'offline'"></span>
             </div>
+            <button @click="logout()" class="logout-btn">logout</button>
         </div>
     </header>
 
@@ -825,30 +707,21 @@
         <!-- System Stats -->
         <div class="stats-bar">
             <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-label">CPU</span>
-                    <i class="fas fa-microchip stat-icon"></i>
-                </div>
+                <div class="stat-label">cpu</div>
                 <div class="stat-value" x-text="system.cpu_percent + '%'">0%</div>
                 <div class="stat-bar">
                     <div class="stat-fill" :style="'width: ' + system.cpu_percent + '%'"></div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-label">Memory</span>
-                    <i class="fas fa-memory stat-icon"></i>
-                </div>
+                <div class="stat-label">memory</div>
                 <div class="stat-value" x-text="system.memory_used_gb + '/' + system.memory_total_gb + ' GB'">0/0 GB</div>
                 <div class="stat-bar">
                     <div class="stat-fill" :style="'width: ' + system.memory_percent + '%'"></div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-label">GPU</span>
-                    <i class="fas fa-bolt stat-icon"></i>
-                </div>
+                <div class="stat-label">gpu</div>
                 <template x-if="system.gpu">
                     <div>
                         <div class="stat-value" x-text="system.gpu.utilization + '%'">0%</div>
@@ -857,13 +730,10 @@
                         </div>
                     </div>
                 </template>
-                <template x-if="!system.gpu"><div class="stat-value" style="color: var(--ink-faded)">N/A</div></template>
+                <template x-if="!system.gpu"><div class="stat-value" style="color: var(--text-dim)">N/A</div></template>
             </div>
             <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-label">GPU Mem</span>
-                    <i class="fas fa-database stat-icon"></i>
-                </div>
+                <div class="stat-label">gpu mem</div>
                 <template x-if="system.gpu">
                     <div>
                         <div class="stat-value" x-text="Math.round(system.gpu.memory_used_mb/1024*10)/10 + '/' + Math.round(system.gpu.memory_total_mb/1024*10)/10 + ' GB'">0/0 GB</div>
@@ -872,7 +742,7 @@
                         </div>
                     </div>
                 </template>
-                <template x-if="!system.gpu"><div class="stat-value" style="color: var(--ink-faded)">N/A</div></template>
+                <template x-if="!system.gpu"><div class="stat-value" style="color: var(--text-dim)">N/A</div></template>
             </div>
         </div>
 
@@ -880,58 +750,58 @@
         <div x-show="currentTab === 'simulations'" x-cloak>
             <div class="grid-3">
                 <!-- Controls -->
-                <div class="space-y">
-                    <div class="card">
-                        <div class="card-header">
-                            <span class="card-title"><i class="fas fa-rocket"></i> Launch Batch</span>
+                <div>
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i class="fas fa-rocket"></i> launch batch</span>
                         </div>
-                        <div class="card-body">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="panel-body">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label class="form-label">Start</label>
+                                    <label class="form-label">start</label>
                                     <input type="number" x-model="batchStart" min="1" class="form-input">
                                 </div>
                                 <div class="form-group" style="margin-bottom: 0;">
-                                    <label class="form-label">End</label>
+                                    <label class="form-label">end</label>
                                     <input type="number" x-model="batchEnd" min="1" class="form-input">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Concurrent: <strong x-text="concurrent"></strong></label>
+                                <label class="form-label">concurrent: <strong style="color: var(--accent)" x-text="concurrent"></strong></label>
                                 <input type="range" x-model="concurrent" min="1" max="5" class="form-range">
                             </div>
                             <button @click="startBatch()" :disabled="loading" class="btn btn-primary btn-block">
                                 <i class="fas fa-play"></i>
-                                <span x-text="loading ? 'Starting...' : 'Launch'"></span>
+                                <span x-text="loading ? 'starting...' : 'launch'"></span>
                             </button>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div class="card-header">
-                            <span class="card-title"><i class="fas fa-tools"></i> Actions</span>
+                    <div class="panel" style="margin-top: 12px;">
+                        <div class="panel-header">
+                            <span class="panel-title"><i class="fas fa-tools"></i> actions</span>
                         </div>
-                        <div class="card-body space-y">
+                        <div class="panel-body" style="display: flex; flex-direction: column; gap: 8px;">
                             <button @click="startSingleTrial()" class="btn btn-block">
-                                <i class="fas fa-plus"></i> Single Trial
+                                <i class="fas fa-plus"></i> single trial
                             </button>
                             <button @click="stopAll()" class="btn btn-danger btn-block">
-                                <i class="fas fa-stop"></i> Stop All
+                                <i class="fas fa-stop"></i> stop all
                             </button>
                             <button @click="refreshStatus()" class="btn btn-block">
-                                <i class="fas fa-sync-alt"></i> Refresh
+                                <i class="fas fa-sync-alt"></i> refresh
                             </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Active Trials -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fas fa-server"></i> Active Trials</span>
-                        <span class="card-badge" x-text="containers.filter(c => c.status === 'running').length + ' running'"></span>
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="panel-title"><i class="fas fa-server"></i> active trials</span>
+                        <span class="badge" x-text="containers.filter(c => c.status === 'running').length + ' running'"></span>
                     </div>
-                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    <div class="panel-body" style="max-height: 450px; overflow-y: auto;">
                         <template x-if="containers.length > 0">
                             <div>
                                 <template x-for="container in containers" :key="container.name">
@@ -941,13 +811,13 @@
                                                 <i class="fas fa-cube"></i>
                                             </div>
                                             <div>
-                                                <div class="trial-name" x-text="'Trial ' + container.trial_id"></div>
+                                                <div class="trial-name" x-text="'trial_' + container.trial_id"></div>
                                                 <div class="trial-status" :class="container.status" x-text="container.status"></div>
                                             </div>
                                         </div>
                                         <div class="trial-actions">
                                             <template x-if="container.status === 'running' && container.vnc_port">
-                                                <a :href="getTrialVncUrl(container.trial_id, container.vnc_port)" target="_blank" class="btn btn-sm">VNC</a>
+                                                <a :href="getTrialVncUrl(container.trial_id, container.vnc_port)" target="_blank" class="btn btn-sm">vnc</a>
                                             </template>
                                             <template x-if="container.status === 'running'">
                                                 <button @click="stopTrial(container.trial_id)" class="btn btn-sm btn-danger"><i class="fas fa-stop"></i></button>
@@ -963,34 +833,34 @@
                         <template x-if="containers.length === 0">
                             <div class="empty-state">
                                 <i class="fas fa-inbox"></i>
-                                <p>No active containers</p>
+                                <p>no active containers</p>
                             </div>
                         </template>
                     </div>
                 </div>
 
                 <!-- Completed Trials -->
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fas fa-check-circle"></i> Completed</span>
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="panel-title"><i class="fas fa-check-circle"></i> completed</span>
                     </div>
-                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    <div class="panel-body" style="max-height: 450px; overflow-y: auto;">
                         <template x-if="completedTrials.length > 0">
                             <div>
                                 <template x-for="trial in completedTrials" :key="trial.id">
                                     <div class="trial-item">
                                         <div class="trial-info">
-                                            <div class="trial-icon" style="background: var(--olive); border-color: var(--olive); color: var(--paper);">
+                                            <div class="trial-icon running">
                                                 <i class="fas fa-check"></i>
                                             </div>
                                             <div>
-                                                <div class="trial-name" x-text="'Trial ' + trial.id"></div>
+                                                <div class="trial-name" x-text="'trial_' + trial.id"></div>
                                                 <div class="trial-status" x-text="trial.field_count + ' fields'"></div>
                                             </div>
                                         </div>
                                         <div class="trial-actions">
                                             <a :href="'/api/download/' + trial.id" class="btn btn-sm"><i class="fas fa-download"></i></a>
-                                            <button @click="runReconstruction(trial.id)" class="btn btn-sm btn-primary">Recon</button>
+                                            <button @click="runReconstruction(trial.id)" class="btn btn-sm btn-primary">recon</button>
                                         </div>
                                     </div>
                                 </template>
@@ -999,7 +869,7 @@
                         <template x-if="completedTrials.length === 0">
                             <div class="empty-state">
                                 <i class="fas fa-folder-open"></i>
-                                <p>No completed trials</p>
+                                <p>no completed trials</p>
                             </div>
                         </template>
                     </div>
@@ -1011,106 +881,106 @@
         <div x-show="currentTab === 'reconstruction'" x-cloak x-init="$watch('currentTab', val => val === 'reconstruction' && loadExistingResults())">
             <div class="grid-3">
                 <!-- Controls -->
-                <div class="space-y">
-                    <div class="card">
-                        <div class="card-header">
-                            <span class="card-title"><i class="fas fa-play-circle"></i> Run</span>
+                <div>
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="panel-title"><i class="fas fa-play-circle"></i> run</span>
                         </div>
-                        <div class="card-body">
+                        <div class="panel-body">
                             <div class="form-group">
-                                <label class="form-label">Select Trial</label>
+                                <label class="form-label">select trial</label>
                                 <select x-model="reconTrial" @change="loadExistingResults()" class="form-select">
                                     <template x-for="trial in completedTrials" :key="trial.id">
-                                        <option :value="trial.id" x-text="'Trial ' + trial.id"></option>
+                                        <option :value="trial.id" x-text="'trial_' + trial.id"></option>
                                     </template>
                                 </select>
                             </div>
                             <button @click="startReconstruction()" :disabled="reconRunning" class="btn btn-primary btn-block">
                                 <i class="fas fa-play" x-show="!reconRunning"></i>
                                 <i class="fas fa-spinner fa-spin" x-show="reconRunning"></i>
-                                <span x-text="reconRunning ? 'Running...' : 'Start'"></span>
+                                <span x-text="reconRunning ? 'running...' : 'start'"></span>
                             </button>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div class="card-header">
-                            <span class="card-title"><i class="fas fa-th"></i> Heatmap</span>
+                    <div class="panel" style="margin-top: 12px;">
+                        <div class="panel-header">
+                            <span class="panel-title"><i class="fas fa-th"></i> heatmap</span>
                         </div>
-                        <div class="card-body space-y">
+                        <div class="panel-body" style="display: flex; flex-direction: column; gap: 8px;">
                             <button @click="generateComparisonHeatmap()" :disabled="reconResults.length === 0" class="btn btn-block">
-                                <i class="fas fa-magic"></i> Generate
+                                <i class="fas fa-magic"></i> generate
                             </button>
                             <button @click="showComparisonHeatmap()" :disabled="!hasComparisonHeatmap" class="btn btn-primary btn-block">
-                                <i class="fas fa-eye"></i> View
+                                <i class="fas fa-eye"></i> view
                             </button>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div class="card-body">
+                    <div class="panel" style="margin-top: 12px;">
+                        <div class="panel-body">
                             <button @click="deleteTrialData()" class="btn btn-danger btn-block">
-                                <i class="fas fa-trash"></i> Delete Trial Data
+                                <i class="fas fa-trash"></i> delete trial data
                             </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Results -->
-                <div class="card" style="grid-column: span 2;">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fas fa-table"></i> Results</span>
-                        <span class="card-badge" x-text="filteredResults.length + '/' + reconResults.length"></span>
+                <div class="panel" style="grid-column: span 2;">
+                    <div class="panel-header">
+                        <span class="panel-title"><i class="fas fa-table"></i> results</span>
+                        <span class="badge" x-text="filteredResults.length + '/' + reconResults.length"></span>
                     </div>
 
                     <!-- Inline Filters -->
                     <div class="filters-inline">
                         <div class="filter-group">
-                            <label>Field</label>
+                            <label>field</label>
                             <select x-model="filterField">
-                                <option value="all">All Fields</option>
-                                <option value="radial">Radial</option>
-                                <option value="x_compress">X Compress</option>
-                                <option value="y_compress">Y Compress</option>
-                                <option value="x_compress_tilt">X Compress Tilt</option>
-                                <option value="y_compress_tilt">Y Compress Tilt</option>
+                                <option value="all">all</option>
+                                <option value="radial">radial</option>
+                                <option value="x_compress">x_compress</option>
+                                <option value="y_compress">y_compress</option>
+                                <option value="x_compress_tilt">x_compress_tilt</option>
+                                <option value="y_compress_tilt">y_compress_tilt</option>
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label>Method</label>
+                            <label>method</label>
                             <select x-model="filterMethod">
-                                <option value="all">All Methods</option>
-                                <option value="standard_gp">Standard GP</option>
-                                <option value="mchutchon_nigp">McHutchon NIGP</option>
-                                <option value="girard">Girard</option>
+                                <option value="all">all</option>
+                                <option value="standard_gp">standard_gp</option>
+                                <option value="mchutchon_nigp">mchutchon_nigp</option>
+                                <option value="girard">girard</option>
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label>Kernel</label>
+                            <label>kernel</label>
                             <select x-model="filterKernel">
-                                <option value="all">All Kernels</option>
-                                <option value="rbf">RBF</option>
-                                <option value="matern15">Matern 1.5</option>
-                                <option value="matern25">Matern 2.5</option>
-                                <option value="exponential">Exponential</option>
+                                <option value="all">all</option>
+                                <option value="rbf">rbf</option>
+                                <option value="matern15">matern15</option>
+                                <option value="matern25">matern25</option>
+                                <option value="exponential">exponential</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="card-body">
+                    <div class="panel-body">
                         <template x-if="filteredResults.length > 0">
                             <div>
                                 <div class="summary-row">
                                     <div class="summary-box">
-                                        <div class="summary-label">Best RMSE</div>
+                                        <div class="summary-label">best rmse</div>
                                         <div class="summary-value" x-text="Math.min(...filteredResults.map(r => r.rmse)).toFixed(4)"></div>
                                     </div>
                                     <div class="summary-box">
-                                        <div class="summary-label">Best NRMSE</div>
+                                        <div class="summary-label">best nrmse</div>
                                         <div class="summary-value" x-text="Math.min(...filteredResults.map(r => r.nrmse)).toFixed(4)"></div>
                                     </div>
                                     <div class="summary-box">
-                                        <div class="summary-label">Methods</div>
+                                        <div class="summary-label">methods</div>
                                         <div class="summary-value" x-text="[...new Set(filteredResults.map(r => r.method))].length"></div>
                                     </div>
                                 </div>
@@ -1119,11 +989,11 @@
                                     <table>
                                         <thead>
                                             <tr>
-                                                <th>Field</th>
-                                                <th>Method</th>
-                                                <th>Kernel</th>
-                                                <th>RMSE</th>
-                                                <th>NRMSE</th>
+                                                <th>field</th>
+                                                <th>method</th>
+                                                <th>kernel</th>
+                                                <th>rmse</th>
+                                                <th>nrmse</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1131,20 +1001,18 @@
                                                 <tr>
                                                     <td x-text="result.field"></td>
                                                     <td>
-                                                        <span class="badge"
+                                                        <span class="badge-method"
                                                             :class="{
                                                                 'badge-blue': result.method === 'standard_gp',
-                                                                'badge-orange': result.method === 'mchutchon_nigp',
-                                                                'badge-olive': result.method === 'girard'
+                                                                'badge-purple': result.method === 'mchutchon_nigp',
+                                                                'badge-yellow': result.method === 'girard'
                                                             }"
-                                                            x-text="result.method.replace('_', ' ')"></span>
+                                                            x-text="result.method"></span>
                                                     </td>
                                                     <td x-text="result.kernel"></td>
-                                                    <td class="text-mono"
-                                                        :class="result.rmse === Math.min(...filteredResults.filter(r => r.field === result.field).map(r => r.rmse)) ? 'text-best' : ''"
+                                                    <td :class="result.rmse === Math.min(...filteredResults.filter(r => r.field === result.field).map(r => r.rmse)) ? 'text-best' : ''"
                                                         x-text="result.rmse.toFixed(4)"></td>
-                                                    <td class="text-mono"
-                                                        :class="result.nrmse === Math.min(...filteredResults.filter(r => r.field === result.field).map(r => r.nrmse)) ? 'text-best' : ''"
+                                                    <td :class="result.nrmse === Math.min(...filteredResults.filter(r => r.field === result.field).map(r => r.nrmse)) ? 'text-best' : ''"
                                                         x-text="result.nrmse.toFixed(4)"></td>
                                                 </tr>
                                             </template>
@@ -1157,14 +1025,14 @@
                         <template x-if="reconResults.length === 0 && !reconRunning">
                             <div class="empty-state">
                                 <i class="fas fa-chart-area"></i>
-                                <p>Run a reconstruction to see results</p>
+                                <p>run reconstruction to see results</p>
                             </div>
                         </template>
 
                         <template x-if="reconRunning">
                             <div class="empty-state">
                                 <i class="fas fa-spinner fa-spin"></i>
-                                <p>Running GP reconstruction...</p>
+                                <p>running gp reconstruction...</p>
                             </div>
                         </template>
                     </div>
@@ -1172,10 +1040,10 @@
             </div>
 
             <!-- Images -->
-            <div class="card" style="margin-top: 20px;" x-show="filteredImages.length > 0">
-                <div class="card-header">
-                    <span class="card-title"><i class="fas fa-images"></i> Images</span>
-                    <span class="card-badge" x-text="filteredImages.length + ' images'"></span>
+            <div class="panel" style="margin-top: 16px;" x-show="filteredImages.length > 0">
+                <div class="panel-header">
+                    <span class="panel-title"><i class="fas fa-images"></i> images</span>
+                    <span class="badge" x-text="filteredImages.length + ' images'"></span>
                 </div>
                 <div class="image-grid">
                     <template x-for="img in filteredImages" :key="img.path">
@@ -1190,33 +1058,33 @@
         <!-- Tab: Host PC -->
         <div x-show="currentTab === 'host'" x-cloak x-init="$watch('currentTab', val => val === 'host' && checkHostVncStatus())">
             <div class="grid-2">
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fas fa-desktop"></i> Remote Desktop</span>
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="panel-title"><i class="fas fa-desktop"></i> remote desktop</span>
                     </div>
-                    <div class="card-body">
+                    <div class="panel-body">
                         <div class="vnc-status-grid">
                             <div class="vnc-status-item">
-                                <span class="dot" :style="hostVncStatus.x11vnc ? 'background: var(--olive)' : 'background: var(--ink-faded)'"></span>
-                                <span>x11vnc</span>
-                                <div style="font-size: 11px; color: var(--ink-faded); margin-top: 4px;" x-text="hostVncStatus.x11vnc ? 'Port 5900' : 'Stopped'"></div>
+                                <span class="dot" :style="hostVncStatus.x11vnc ? 'background: var(--accent)' : 'background: var(--text-dim)'"></span>
+                                <span> x11vnc</span>
+                                <div style="font-size: 10px; color: var(--text-dim); margin-top: 4px;" x-text="hostVncStatus.x11vnc ? 'port 5900' : 'stopped'"></div>
                             </div>
                             <div class="vnc-status-item">
-                                <span class="dot" :style="hostVncStatus.novnc ? 'background: var(--olive)' : 'background: var(--ink-faded)'"></span>
-                                <span>noVNC</span>
-                                <div style="font-size: 11px; color: var(--ink-faded); margin-top: 4px;" x-text="hostVncStatus.novnc ? 'Port 6080' : 'Stopped'"></div>
+                                <span class="dot" :style="hostVncStatus.novnc ? 'background: var(--accent)' : 'background: var(--text-dim)'"></span>
+                                <span> novnc</span>
+                                <div style="font-size: 10px; color: var(--text-dim); margin-top: 4px;" x-text="hostVncStatus.novnc ? 'port 6080' : 'stopped'"></div>
                             </div>
                         </div>
 
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                             <template x-if="!hostVncRunning">
                                 <button @click="startHostVNC()" class="btn btn-primary" style="flex: 1;">
-                                    <i class="fas fa-play"></i> Start
+                                    <i class="fas fa-play"></i> start
                                 </button>
                             </template>
                             <template x-if="hostVncRunning">
                                 <button @click="stopHostVNC()" class="btn btn-danger" style="flex: 1;">
-                                    <i class="fas fa-stop"></i> Stop
+                                    <i class="fas fa-stop"></i> stop
                                 </button>
                             </template>
                             <button @click="checkHostVncStatus()" class="btn">
@@ -1226,36 +1094,36 @@
 
                         <template x-if="hostVncRunning">
                             <a :href="getHostVncUrl()" target="_blank" class="btn btn-primary btn-block">
-                                <i class="fas fa-external-link-alt"></i> Open Desktop
+                                <i class="fas fa-external-link-alt"></i> open desktop
                             </a>
                         </template>
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title"><i class="fas fa-server"></i> System Info</span>
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="panel-title"><i class="fas fa-server"></i> system info</span>
                     </div>
-                    <div class="card-body">
+                    <div class="panel-body">
                         <div class="info-row">
-                            <span class="info-label">Status</span>
-                            <span style="color: var(--olive);"><span class="dot pulse" style="background: var(--olive); display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px;"></span>Online</span>
+                            <span class="info-label">status</span>
+                            <span style="color: var(--accent);"><span class="dot pulse" style="display: inline-block; margin-right: 6px;"></span>online</span>
                         </div>
                         <div class="info-row">
-                            <span class="info-label">GPU</span>
+                            <span class="info-label">gpu</span>
                             <span x-text="system.gpu ? system.gpu.name : 'N/A'"></span>
                         </div>
                         <div class="info-row">
-                            <span class="info-label">GPU Memory</span>
+                            <span class="info-label">gpu memory</span>
                             <span x-text="system.gpu ? Math.round(system.gpu.memory_total_mb/1024) + ' GB' : 'N/A'"></span>
                         </div>
                         <div class="info-row">
-                            <span class="info-label">System RAM</span>
+                            <span class="info-label">system ram</span>
                             <span x-text="system.memory_total_gb + ' GB'"></span>
                         </div>
                         <div class="info-row">
-                            <span class="info-label">CPU Usage</span>
-                            <span style="color: var(--olive);" x-text="system.cpu_percent + '%'"></span>
+                            <span class="info-label">cpu usage</span>
+                            <span style="color: var(--accent);" x-text="system.cpu_percent + '%'"></span>
                         </div>
                     </div>
                 </div>
@@ -1355,7 +1223,7 @@
 
                 async refreshStatus() {
                     try {
-                        const response = await fetch('/api/status');
+                        const response = await fetch('/api/status', { credentials: 'include' });
                         const data = await response.json();
                         this.containers = data.containers;
                         this.system = data.system;
@@ -1377,40 +1245,41 @@
                         const response = await fetch('/api/batch/start', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
                             body: JSON.stringify({ start_trial: parseInt(this.batchStart), end_trial: parseInt(this.batchEnd), concurrent: parseInt(this.concurrent) })
                         });
                         const data = await response.json();
-                        this.notify('success', `Started ${data.started.length} trials`);
+                        this.notify('success', `started ${data.started.length} trials`);
                         this.refreshStatus();
-                    } catch (e) { this.notify('error', 'Failed to start batch'); }
+                    } catch (e) { this.notify('error', 'failed to start batch'); }
                     this.loading = false;
                 },
 
                 async startSingleTrial() {
-                    const trialId = prompt('Enter trial number:');
+                    const trialId = prompt('enter trial number:');
                     if (trialId) {
                         try {
-                            await fetch(`/api/trial/start/${trialId}`, { method: 'POST' });
-                            this.notify('success', `Trial ${trialId} started`);
+                            await fetch(`/api/trial/start/${trialId}`, { method: 'POST', credentials: 'include' });
+                            this.notify('success', `trial ${trialId} started`);
                             this.refreshStatus();
-                        } catch (e) { this.notify('error', 'Failed to start trial'); }
+                        } catch (e) { this.notify('error', 'failed to start trial'); }
                     }
                 },
 
                 async stopTrial(trialId) {
                     try {
-                        await fetch(`/api/trial/stop/${trialId}`, { method: 'POST' });
-                        this.notify('success', `Trial ${trialId} stopped`);
+                        await fetch(`/api/trial/stop/${trialId}`, { method: 'POST', credentials: 'include' });
+                        this.notify('success', `trial ${trialId} stopped`);
                         this.refreshStatus();
-                    } catch (e) { this.notify('error', 'Failed to stop trial'); }
+                    } catch (e) { this.notify('error', 'failed to stop trial'); }
                 },
 
                 async removeTrial(trialId) {
                     try {
-                        await fetch(`/api/trial/${trialId}`, { method: 'DELETE' });
-                        this.notify('success', `Trial ${trialId} removed`);
+                        await fetch(`/api/trial/${trialId}`, { method: 'DELETE', credentials: 'include' });
+                        this.notify('success', `trial ${trialId} removed`);
                         this.refreshStatus();
-                    } catch (e) { this.notify('error', 'Failed to remove trial'); }
+                    } catch (e) { this.notify('error', 'failed to remove trial'); }
                 },
 
                 getTrialVncUrl(trialId, vncPort) {
@@ -1430,12 +1299,12 @@
                 },
 
                 async stopAll() {
-                    if (confirm('Stop all running trials?')) {
+                    if (confirm('stop all running trials?')) {
                         try {
-                            await fetch('/api/batch/stop', { method: 'POST' });
-                            this.notify('success', 'All trials stopped');
+                            await fetch('/api/batch/stop', { method: 'POST', credentials: 'include' });
+                            this.notify('success', 'all trials stopped');
                             this.refreshStatus();
-                        } catch (e) { this.notify('error', 'Failed to stop trials'); }
+                        } catch (e) { this.notify('error', 'failed to stop trials'); }
                     }
                 },
 
@@ -1452,18 +1321,19 @@
                         const response = await fetch(`/api/reconstruct/${this.reconTrial}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
                             body: JSON.stringify({ field: 'all', method: 'all' })
                         });
                         const data = await response.json();
                         if (data.success) {
-                            this.notify('info', `Reconstruction started for trial ${this.reconTrial}`);
+                            this.notify('info', `reconstruction started for trial ${this.reconTrial}`);
                             this.pollReconstructionStatus();
                         } else {
-                            this.notify('error', data.message || 'Failed');
+                            this.notify('error', data.message || 'failed');
                             this.reconRunning = false;
                         }
                     } catch (e) {
-                        this.notify('error', 'Reconstruction failed');
+                        this.notify('error', 'reconstruction failed');
                         this.reconRunning = false;
                     }
                 },
@@ -1477,8 +1347,8 @@
                                 setTimeout(poll, 2000);
                             } else {
                                 if (data.success === false || data.return_code !== 0) {
-                                    this.reconError = data.error || 'Failed';
-                                    this.notify('error', 'Reconstruction failed');
+                                    this.reconError = data.error || 'failed';
+                                    this.notify('error', 'reconstruction failed');
                                     this.reconRunning = false;
                                 } else {
                                     this.reconError = null;
@@ -1487,7 +1357,7 @@
                             }
                         } catch (e) {
                             this.reconRunning = false;
-                            this.reconError = 'Status check failed';
+                            this.reconError = 'status check failed';
                         }
                     };
                     poll();
@@ -1504,10 +1374,10 @@
                         }
                         await this.loadReconstructionImages();
                         if (this.reconResults.length > 0) {
-                            this.notify('success', `Loaded ${this.reconResults.length} results`);
+                            this.notify('success', `loaded ${this.reconResults.length} results`);
                         }
                     } catch (e) {
-                        this.notify('error', 'Failed to load results');
+                        this.notify('error', 'failed to load results');
                         this.reconResults = [];
                         this.reconImages = [];
                     }
@@ -1553,13 +1423,13 @@
                         const response = await fetch(`/api/reconstruct/${this.reconTrial}/generate-heatmap`, { method: 'POST', credentials: 'include' });
                         const data = await response.json();
                         if (data.success) {
-                            this.notify('success', 'Heatmap generated');
+                            this.notify('success', 'heatmap generated');
                             await this.loadReconstructionImages();
                         } else {
-                            this.notify('error', 'Failed to generate heatmap');
+                            this.notify('error', 'failed to generate heatmap');
                         }
                     } catch (e) {
-                        this.notify('error', 'Failed to generate heatmap');
+                        this.notify('error', 'failed to generate heatmap');
                     }
                     this.reconRunning = false;
                 },
@@ -1575,12 +1445,12 @@
                 },
 
                 async deleteTrialData() {
-                    if (!confirm(`Delete all data for trial ${this.reconTrial}?`)) return;
+                    if (!confirm(`delete all data for trial ${this.reconTrial}?`)) return;
                     try {
                         const response = await fetch(`/api/trial/${this.reconTrial}/data`, { method: 'DELETE', credentials: 'include' });
                         const data = await response.json();
                         if (data.success) {
-                            this.notify('success', 'Trial deleted');
+                            this.notify('success', 'trial deleted');
                             this.reconResults = [];
                             this.reconImages = [];
                             this.reconError = null;
@@ -1590,37 +1460,37 @@
                                 await this.loadExistingResults();
                             }
                         } else {
-                            this.notify('error', 'Delete failed');
+                            this.notify('error', 'delete failed');
                         }
                     } catch (e) {
-                        this.notify('error', 'Failed to delete');
+                        this.notify('error', 'failed to delete');
                     }
                 },
 
                 async startHostVNC() {
                     try {
-                        const response = await fetch('/api/host/vnc/start', { method: 'POST' });
+                        const response = await fetch('/api/host/vnc/start', { method: 'POST', credentials: 'include' });
                         const data = await response.json();
                         if (data.success) {
                             this.hostVncRunning = true;
-                            this.notify('success', 'VNC started');
+                            this.notify('success', 'vnc started');
                         } else {
-                            this.notify('error', 'Failed to start VNC');
+                            this.notify('error', 'failed to start vnc');
                         }
-                    } catch (e) { this.notify('error', 'Failed to start VNC'); }
+                    } catch (e) { this.notify('error', 'failed to start vnc'); }
                 },
 
                 async stopHostVNC() {
                     try {
-                        await fetch('/api/host/vnc/stop', { method: 'POST' });
+                        await fetch('/api/host/vnc/stop', { method: 'POST', credentials: 'include' });
                         this.hostVncRunning = false;
-                        this.notify('success', 'VNC stopped');
-                    } catch (e) { this.notify('error', 'Failed to stop VNC'); }
+                        this.notify('success', 'vnc stopped');
+                    } catch (e) { this.notify('error', 'failed to stop vnc'); }
                 },
 
                 async checkHostVncStatus() {
                     try {
-                        const response = await fetch('/api/host/vnc/status');
+                        const response = await fetch('/api/host/vnc/status', { credentials: 'include' });
                         const data = await response.json();
                         this.hostVncRunning = data.running;
                         this.hostVncStatus = { x11vnc: data.x11vnc_running || false, novnc: data.novnc_running || false };
@@ -1636,7 +1506,7 @@
                 },
 
                 async logout() {
-                    if (confirm('Are you sure you want to logout?')) {
+                    if (confirm('logout?')) {
                         try {
                             await fetch('/api/logout', {
                                 method: 'POST',
@@ -1644,7 +1514,7 @@
                             });
                             window.location.href = '/login';
                         } catch (e) {
-                            console.error('Logout failed:', e);
+                            console.error('logout failed:', e);
                             window.location.href = '/login';
                         }
                     }
