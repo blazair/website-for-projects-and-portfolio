@@ -701,29 +701,14 @@
         }
 
         .skill-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
+            padding: 8px 0;
             font-size: 14px;
             color: var(--ink-light);
+            border-bottom: 1px dashed var(--paper-dark);
         }
 
-        .skill-dots {
-            display: flex;
-            gap: 4px;
-        }
-
-        .skill-dots span {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--paper-dark);
-            transition: all 0.3s ease;
-        }
-
-        .skill-dots span.filled {
-            background: var(--olive);
+        .skill-row:last-child {
+            border-bottom: none;
         }
 
         .research-focus {
@@ -1062,7 +1047,9 @@
                         <span class="pdf-title">Paper Preview</span>
                         <a href="/static/icra-paper.pdf" download class="pdf-download">Download PDF</a>
                     </div>
-                    <iframe src="/static/icra-paper.pdf" class="pdf-viewer"></iframe>
+                    <object data="/static/icra-paper.pdf" type="application/pdf" class="pdf-viewer">
+                        <p>PDF cannot be displayed. <a href="/static/icra-paper.pdf" target="_blank">Click here to view the paper</a></p>
+                    </object>
                 </div>
             </div>
         </div>
@@ -1144,128 +1131,33 @@
                 <div class="skills-grid">
                     <div class="skill-column reveal">
                         <h3>Languages</h3>
-                        <div class="skill-row">
-                            <span>Python</span>
-                            <div class="skill-dots">
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                            </div>
-                        </div>
-                        <div class="skill-row">
-                            <span>MATLAB</span>
-                            <div class="skill-dots">
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-                        </div>
+                        <div class="skill-row"><span>Python</span></div>
+                        <div class="skill-row"><span>MATLAB</span></div>
+                        <div class="skill-row"><span>C++</span></div>
                     </div>
 
                     <div class="skill-column reveal">
                         <h3>Robotics</h3>
-                        <div class="skill-row">
-                            <span>ROS 2</span>
-                            <div class="skill-dots">
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                            </div>
-                        </div>
-                        <div class="skill-row">
-                            <span>Gazebo</span>
-                            <div class="skill-dots">
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                            </div>
-                        </div>
-                        <div class="skill-row">
-                            <span>PX4</span>
-                            <div class="skill-dots">
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                            </div>
-                        </div>
+                        <div class="skill-row"><span>ROS 2</span></div>
+                        <div class="skill-row"><span>Gazebo</span></div>
+                        <div class="skill-row"><span>PX4</span></div>
+                        <div class="skill-row"><span>ArduPilot</span></div>
                     </div>
 
                     <div class="skill-column reveal">
                         <h3>Machine Learning</h3>
-                        <div class="skill-row">
-                            <span>GPyTorch</span>
-                            <div class="skill-dots">
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                            </div>
-                        </div>
-                        <div class="skill-row">
-                            <span>PyTorch</span>
-                            <div class="skill-dots">
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                            </div>
-                        </div>
-                        <div class="skill-row">
-                            <span>NumPy</span>
-                            <div class="skill-dots">
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                            </div>
-                        </div>
+                        <div class="skill-row"><span>GPyTorch</span></div>
+                        <div class="skill-row"><span>PyTorch</span></div>
+                        <div class="skill-row"><span>NumPy</span></div>
+                        <div class="skill-row"><span>Scikit-learn</span></div>
                     </div>
 
                     <div class="skill-column reveal">
                         <h3>Infrastructure</h3>
-                        <div class="skill-row">
-                            <span>Docker</span>
-                            <div class="skill-dots">
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span></span>
-                            </div>
-                        </div>
-                        <div class="skill-row">
-                            <span>Linux</span>
-                            <div class="skill-dots">
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span></span>
-                            </div>
-                        </div>
-                        <div class="skill-row">
-                            <span>Git</span>
-                            <div class="skill-dots">
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span class="filled"></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-                        </div>
+                        <div class="skill-row"><span>Docker</span></div>
+                        <div class="skill-row"><span>Linux</span></div>
+                        <div class="skill-row"><span>Git</span></div>
+                        <div class="skill-row"><span>Bash</span></div>
                     </div>
                 </div>
 
@@ -1508,21 +1400,6 @@
                 duration: 0.5,
                 delay: i * 0.08,
                 ease: 'power2.out'
-            });
-        });
-
-        // Skill dots animation
-        gsap.utils.toArray('.skill-dots').forEach(dots => {
-            const filled = dots.querySelectorAll('.filled');
-            gsap.from(filled, {
-                scrollTrigger: {
-                    trigger: dots,
-                    start: 'top 90%'
-                },
-                scale: 0,
-                duration: 0.3,
-                stagger: 0.05,
-                ease: 'back.out(2)'
             });
         });
 
