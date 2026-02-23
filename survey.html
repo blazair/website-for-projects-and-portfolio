@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spatio-Temporal Analysis of Tempe Town Lake</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #060d14;
+            --bg-card: #0f1c2a;
+            --border: #1a2d40;
+            --border-active: #2a5078;
+            --text: #e4e9ef;
+            --text-sec: #8fa3b8;
+            --text-dim: #506578;
+            --accent: #06b6d4;
+            --accent-light: #22d3ee;
+            --accent-glow: rgba(6,182,212,0.12);
+            --accent-border: rgba(6,182,212,0.3);
+            --hot: #ef4444;
+            --hot-light: #f87171;
+            --cold: #3b82f6;
+            --cold-light: #60a5fa;
+            --gold: #f59e0b;
+            --radius: 10px;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            height: 100vh;
+            overflow: hidden;
+        }
+        a { color: var(--accent-light); text-decoration: none; }
+
+        /* ─── LAYOUT: header + map fills viewport ─── */
+        .page { display: flex; flex-direction: column; height: 100vh; }
+
+        /* ─── HEADER ─── */
+        .header {
+            flex-shrink: 0;
+            background: linear-gradient(180deg, rgba(6,13,20,0.98) 0%, rgba(10,22,40,0.95) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 28px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        .header-left { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+        .header-logo { height: 48px; border-radius: 6px; }
+        .header-text h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+        .header-sub {
+            font-size: 0.68rem;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+        .header-center {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .header-authors {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            flex-wrap: wrap;
+            font-size: 0.92rem;
+        }
+        .header-authors .author {
+            color: #fff;
+            font-weight: 600;
+            white-space: nowrap;
+            padding: 0 12px;
+            border-right: 1px solid var(--border);
+            line-height: 1;
+        }
+        .header-authors .author:last-child {
+            border-right: none;
+        }
+        .header-authors .author sup {
+            color: var(--accent);
+            font-size: 0.6rem;
+            margin-left: 2px;
+        }
+        .header-authors .advisor-name {
+            color: var(--accent-light);
+        }
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 0.72rem;
+            color: var(--text-dim);
+        }
+        .header-meta .sep {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--text-dim);
+        }
+        .header-meta .advisor strong {
+            color: var(--accent-light);
+            font-weight: 600;
+        }
+        .header-links {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+        .header-links a {
+            color: var(--text-sec);
+            padding: 3px 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            text-align: center;
+            transition: all 0.15s;
+        }
+        .header-links a:hover { color: var(--text); border-color: var(--accent-border); }
+
+        /* ─── MAP ─── */
+        #map { flex: 1; width: 100%; }
+
+        /* ─── FLOATING CONTROL PANEL ─── */
+        .panel {
+            position: absolute;
+            top: 80px;
+            left: 16px;
+            z-index: 1000;
+            width: 300px;
+            background: rgba(6,13,20,0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            transition: transform 0.2s;
+        }
+        .panel.collapsed { transform: translateX(-284px); }
+        .panel-toggle {
+            position: absolute;
+            top: 8px;
+            right: -32px;
+            width: 28px;
+            height: 28px;
+            background: rgba(6,13,20,0.92);
+            border: 1px solid var(--border);
+            border-left: none;
+            border-radius: 0 6px 6px 0;
+            color: var(--text-sec);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+        .panel-section {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .panel-section:last-child { border-bottom: none; }
+        .panel-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-dim);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        /* Date buttons */
+        .date-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+        .date-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-sec);
+            font-family: inherit;
+            font-size: 0.74rem;
+            font-weight: 500;
+            padding: 6px 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.12s;
+            text-align: center;
+        }
+        .date-btn:hover { border-color: var(--border-active); color: var(--text); }
+        .date-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        /* Variable buttons */
+        .var-list { display: flex; flex-direction: column; gap: 2px; }
+        .var-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-family: inherit;
+            font-size: 0.78rem;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.1s;
+            display: flex;
+            justify-content: space-between;
+        }
+        .var-btn:hover { background: rgba(255,255,255,0.04); color: var(--text-sec); }
+        .var-btn.active {
+            background: var(--accent-glow);
+            color: var(--accent-light);
+            font-weight: 500;
+        }
+        .var-btn .unit { font-size: 0.68rem; color: var(--text-dim); }
+
+        /* GP type toggle */
+        .gp-toggle {
+            display: flex;
+            gap: 0;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .gp-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-family: inherit;
+            font-size: 0.74rem;
+            font-weight: 500;
+            padding: 7px 8px;
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+        .gp-btn:first-child { border-right: 1px solid var(--border); }
+        .gp-btn:hover { color: var(--text-sec); }
+        .gp-btn.active { background: var(--accent); color: #fff; }
+
+        /* Layer toggles */
+        .layer-toggles { display: flex; flex-direction: column; gap: 4px; }
+        .layer-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            color: var(--text-sec);
+            cursor: pointer;
+            padding: 4px 0;
+        }
+        .layer-toggle input[type="checkbox"] {
+            accent-color: var(--accent);
+            width: 14px;
+            height: 14px;
+        }
+        .layer-toggle .swatch {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* Opacity slider */
+        .opacity-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .opacity-row label {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+        .opacity-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+            height: 4px;
+        }
+        .opacity-val {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            min-width: 28px;
+            text-align: right;
+        }
+
+        /* ─── STATS PANEL (bottom right) ─── */
+        .stats-float {
+            position: absolute;
+            bottom: 24px;
+            right: 16px;
+            z-index: 1000;
+            background: rgba(6,13,20,0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            min-width: 220px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .stats-title {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .sg-item {}
+        .sg-val {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+        .sg-label {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-dim);
+            margin-top: 3px;
+        }
+        .sg-val.hot { color: var(--hot-light); }
+        .sg-val.cold { color: var(--cold-light); }
+        .sg-val.accent { color: var(--accent-light); }
+        .sg-val.gold { color: var(--gold); }
+
+        /* ─── INFO BADGE (top center) ─── */
+        .info-badge {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(6,13,20,0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 7px 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--accent-light);
+            pointer-events: none;
+            white-space: nowrap;
+            transition: opacity 0.3s;
+        }
+        .info-badge .dim { color: var(--text-dim); font-weight: 400; margin-left: 8px; }
+
+        /* ─── COLORBAR FLOAT ─── */
+        .colorbar-float {
+            position: absolute;
+            bottom: 24px;
+            left: 336px;
+            z-index: 1000;
+            background: rgba(6,13,20,0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 8px;
+        }
+        .colorbar-float img {
+            height: 200px;
+            width: auto;
+        }
+
+        /* ─── RESULT IMAGE VIEWER ─── */
+        .result-viewer {
+            position: absolute;
+            bottom: 24px;
+            left: 16px;
+            z-index: 1000;
+            width: 300px;
+            background: rgba(6,13,20,0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .rv-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            cursor: pointer;
+        }
+        .rv-title {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            font-weight: 600;
+        }
+        .rv-toggle {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+        .rv-body {
+            display: none;
+            padding: 4px 10px 10px;
+        }
+        .rv-body.open { display: block; }
+        .rv-thumbs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+        .rv-thumb {
+            cursor: pointer;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            transition: border-color 0.15s;
+        }
+        .rv-thumb:hover { border-color: var(--accent); }
+        .rv-thumb img {
+            width: 100%;
+            display: block;
+        }
+        .rv-thumb-label {
+            font-size: 0.62rem;
+            color: var(--text-dim);
+            padding: 3px 5px;
+            text-align: center;
+            background: rgba(0,0,0,0.3);
+        }
+
+        /* ─── LIGHTBOX ─── */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.94);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+        }
+        .lightbox.active { display: flex; }
+        .lightbox img { max-width: 95vw; max-height: 95vh; border-radius: 6px; }
+
+        /* ─── LEAFLET OVERRIDES ─── */
+        .leaflet-control-layers {
+            background: rgba(6,13,20,0.9) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 8px !important;
+            color: var(--text) !important;
+        }
+        .leaflet-control-layers label { color: var(--text-sec) !important; }
+        .leaflet-control-zoom a {
+            background: rgba(6,13,20,0.9) !important;
+            color: var(--text) !important;
+            border-color: var(--border) !important;
+        }
+        .leaflet-popup-content-wrapper {
+            background: rgba(6,13,20,0.95) !important;
+            color: var(--text) !important;
+            border-radius: 8px !important;
+            border: 1px solid var(--border) !important;
+        }
+        .leaflet-popup-tip { background: rgba(6,13,20,0.95) !important; }
+        .leaflet-popup-content { font-family: 'Inter', sans-serif !important; font-size: 0.82rem !important; }
+
+        /* scrollbar for panel */
+        .panel::-webkit-scrollbar { width: 4px; }
+        .panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        @media (max-width: 640px) {
+            .header { flex-wrap: wrap; padding: 8px 12px; }
+            .header-center { display: none; }
+            .panel { width: 260px; left: 8px; top: 72px; }
+            .stats-float { bottom: 8px; right: 8px; min-width: 180px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <img src="static/dreams-logo.png" alt="DREAMS Lab" class="header-logo">
+            <div class="header-text">
+                <h1>Spatio-Temporal Analysis of Tempe Town Lake</h1>
+                <div class="header-sub">DREAMS Laboratory &middot; School of Earth and Space Exploration &middot; Arizona State University</div>
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="header-authors">
+                <span class="author">Rodney Staggers Jr<sup>*</sup></span>
+                <span class="author">Bharath Vedantha Desikan<sup>*</sup></span>
+                <span class="author">Carlos Torre</span>
+                <span class="author">Kanav Prashar</span>
+                <span class="author advisor-name">Dr. Jnaneshwar Das</span>
+            </div>
+            <div class="header-meta">
+                <span>* Equal contribution</span>
+                <span class="sep"></span>
+                <span>DREAMS Lab &middot; Arizona State University</span>
+            </div>
+        </div>
+        <div class="header-links">
+            <a href="https://github.com/DREAMS-lab/aquatic-mapping" target="_blank">GitHub</a>
+            <a href="index.html">Portfolio</a>
+        </div>
+    </header>
+
+    <!-- Map -->
+    <div id="map"></div>
+</div>
+
+<!-- Floating Control Panel -->
+<div class="panel" id="panel">
+    <div class="panel-toggle" id="panel-toggle" title="Toggle panel">&#9776;</div>
+
+    <div class="panel-section">
+        <div class="panel-label">Survey Date</div>
+        <div class="date-grid" id="date-grid"></div>
+    </div>
+
+    <div class="panel-section">
+        <div class="panel-label">Variable</div>
+        <div class="var-list" id="var-list"></div>
+    </div>
+
+    <div class="panel-section">
+        <div class="panel-label">GP Model</div>
+        <div class="gp-toggle">
+            <button class="gp-btn active" data-gp="stationary">Stationary</button>
+            <button class="gp-btn" data-gp="nonstationary">Non-stationary</button>
+        </div>
+    </div>
+
+    <div class="panel-section">
+        <div class="panel-label">Map Layers</div>
+        <div class="layer-toggles">
+            <label class="layer-toggle">
+                <input type="checkbox" id="layer-trajectory" checked>
+                <span class="swatch" style="background:var(--accent)"></span>
+                Survey Trajectory
+            </label>
+            <label class="layer-toggle">
+                <input type="checkbox" id="layer-mean">
+                <span class="swatch" style="background:#e8a030"></span>
+                Mean Field Overlay
+            </label>
+            <label class="layer-toggle">
+                <input type="checkbox" id="layer-hotspots" checked>
+                <span class="swatch" style="background:var(--hot)"></span>
+                Hotspot Markers
+            </label>
+            <label class="layer-toggle">
+                <input type="checkbox" id="layer-uncertainty">
+                <span class="swatch" style="background:#a855f7"></span>
+                Uncertainty Overlay
+            </label>
+        </div>
+        <div class="opacity-row">
+            <label>Overlay opacity</label>
+            <input type="range" id="opacity-slider" min="0" max="100" value="65">
+            <span class="opacity-val" id="opacity-val">65%</span>
+        </div>
+    </div>
+</div>
+
+<!-- Info Badge -->
+<div class="info-badge" id="info-badge">Loading...</div>
+
+<!-- Stats Panel -->
+<div class="stats-float" id="stats-float">
+    <div class="stats-title" id="stats-title">Kac-Rice Peak Detection</div>
+    <div class="stats-grid">
+        <div class="sg-item"><div class="sg-val accent" id="s-cand">--</div><div class="sg-label">Candidates</div></div>
+        <div class="sg-item"><div class="sg-val hot" id="s-hot">--</div><div class="sg-label">Sig. Hot</div></div>
+        <div class="sg-item"><div class="sg-val cold" id="s-cold">--</div><div class="sg-label">Sig. Cold</div></div>
+        <div class="sg-item"><div class="sg-val gold" id="s-pval">--</div><div class="sg-label">Min p-value</div></div>
+    </div>
+</div>
+
+<!-- Colorbar Float (shown when overlay active) -->
+<div class="colorbar-float" id="colorbar-float" style="display:none;">
+    <img id="colorbar-img" src="" alt="colorbar">
+</div>
+
+<!-- Result Image Viewer (bottom left, click to expand) -->
+<div class="result-viewer" id="result-viewer">
+    <div class="rv-header">
+        <span class="rv-title" id="rv-title">Result Images</span>
+        <button class="rv-toggle" id="rv-toggle" title="Toggle">&#9660;</button>
+    </div>
+    <div class="rv-body" id="rv-body">
+        <div class="rv-thumbs" id="rv-thumbs"></div>
+    </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">
+    <img id="lb-img" src="" alt="">
+</div>
+
+<script>
+// ── CONFIG ──
+const DATES = [
+    { key: 'sep19', label: 'Sep 19' },
+    { key: 'oct3',  label: 'Oct 3' },
+    { key: 'dec6',  label: 'Dec 6' },
+    { key: 'dec17', label: 'Dec 17' },
+    { key: 'jan31', label: 'Jan 31' },
+    { key: 'feb15', label: 'Feb 15' }
+];
+const VARS = [
+    { key: 'temperature',  label: 'Temperature',  unit: '\u00b0C' },
+    { key: 'pH',           label: 'pH',            unit: '' },
+    { key: 'conductivity', label: 'Conductivity',  unit: '\u03bcS/cm' },
+    { key: 'DO_conc',      label: 'DO Conc.',      unit: 'mg/L' },
+    { key: 'DO_sat',       label: 'DO Sat.',       unit: '%' },
+    { key: 'chlorophyll',  label: 'Chlorophyll',   unit: '\u03bcg/L' },
+    { key: 'CDOM',         label: 'CDOM',          unit: 'ppb' },
+    { key: 'depth',        label: 'Depth',         unit: 'm' },
+    { key: 'turbidity',    label: 'Turbidity',     unit: 'NTU' }
+];
+
+let curDate = 'sep19', curVar = 'temperature', curGP = 'stationary';
+let manifest = null;
+let trajCache = {};
+
+// Map layers
+let trajectoryLayer = null;
+let meanOverlay = null;
+let uncertaintyOverlay = null;
+let hotspotsLayer = null;
+let overlayOpacity = 0.65;
+
+// ── MAP ──
+const map = L.map('map', { zoomControl: false, attributionControl: false, maxZoom: 22 }).setView([33.431, -111.929], 3);
+
+const satellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 22 });
+const hybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 22 });
+satellite.addTo(map);
+L.control.layers({ 'Satellite': satellite, 'Hybrid': hybrid }, {}, { position: 'topright', collapsed: true }).addTo(map);
+L.control.zoom({ position: 'topright' }).addTo(map);
+
+// ── HELPERS ──
+function getEntry() {
+    if (!manifest) return null;
+    return manifest[curDate]?.variables?.[curVar]?.[curGP] || null;
+}
+function getBounds() {
+    const entry = getEntry();
+    return entry?.bounds || null;
+}
+function imgPath(relFile) {
+    const entry = getEntry();
+    if (!entry) return '';
+    return `static/results/${entry.path_prefix}/${relFile}`;
+}
+
+// ── BUILD CONTROLS ──
+const dateGrid = document.getElementById('date-grid');
+DATES.forEach(d => {
+    const b = document.createElement('button');
+    b.className = 'date-btn' + (d.key === curDate ? ' active' : '');
+    b.textContent = d.label;
+    b.onclick = () => { curDate = d.key; syncDateBtns(); update(); };
+    dateGrid.appendChild(b);
+});
+
+const varList = document.getElementById('var-list');
+VARS.forEach(v => {
+    const b = document.createElement('button');
+    b.className = 'var-btn' + (v.key === curVar ? ' active' : '');
+    b.innerHTML = `${v.label} <span class="unit">${v.unit}</span>`;
+    b.dataset.v = v.key;
+    b.onclick = () => { curVar = v.key; syncVarBtns(); update(); };
+    varList.appendChild(b);
+});
+
+document.querySelectorAll('.gp-btn').forEach(b => {
+    b.onclick = () => {
+        curGP = b.dataset.gp;
+        document.querySelectorAll('.gp-btn').forEach(x => x.classList.toggle('active', x === b));
+        update();
+    };
+});
+
+// Layer toggles
+document.getElementById('layer-trajectory').onchange = e => { toggleTrajectory(e.target.checked); };
+document.getElementById('layer-mean').onchange = e => { toggleMean(e.target.checked); };
+document.getElementById('layer-hotspots').onchange = e => { toggleHotspots(e.target.checked); };
+document.getElementById('layer-uncertainty').onchange = e => { toggleUncertainty(e.target.checked); };
+document.getElementById('opacity-slider').oninput = e => {
+    overlayOpacity = e.target.value / 100;
+    document.getElementById('opacity-val').textContent = e.target.value + '%';
+    if (meanOverlay) meanOverlay.setOpacity(overlayOpacity);
+    if (uncertaintyOverlay) uncertaintyOverlay.setOpacity(overlayOpacity);
+};
+
+// Panel toggle
+document.getElementById('panel-toggle').onclick = () => {
+    document.getElementById('panel').classList.toggle('collapsed');
+};
+
+// Result viewer toggle
+document.getElementById('rv-header')?.addEventListener('click', () => {
+    document.getElementById('rv-body').classList.toggle('open');
+    const btn = document.getElementById('rv-toggle');
+    btn.innerHTML = document.getElementById('rv-body').classList.contains('open') ? '&#9650;' : '&#9660;';
+});
+
+function syncDateBtns() {
+    dateGrid.querySelectorAll('.date-btn').forEach((b, i) => b.classList.toggle('active', DATES[i].key === curDate));
+}
+function syncVarBtns() {
+    varList.querySelectorAll('.var-btn').forEach(b => b.classList.toggle('active', b.dataset.v === curVar));
+}
+
+// ── LOAD MANIFEST ──
+async function loadManifest() {
+    try {
+        const r = await fetch('static/results/web_manifest.json');
+        manifest = await r.json();
+        console.log('Manifest loaded:', Object.keys(manifest));
+    } catch(e) { console.error('Manifest load failed:', e); }
+}
+
+// ── LOAD SUMMARIES ──
+let summaryData = {};
+async function loadSummaries() {
+    await Promise.all(DATES.map(async d => {
+        try {
+            const r = await fetch(`static/results/summary_${d.key}.json`);
+            summaryData[d.key] = (await r.json()).results;
+        } catch(e) {}
+    }));
+}
+
+// ── UPDATE ──
+function update() {
+    const dl = DATES.find(d => d.key === curDate)?.label;
+    const vl = VARS.find(v => v.key === curVar)?.label;
+
+    // Fly to survey area using bounds from manifest
+    const bounds = getBounds();
+    if (bounds) {
+        map.flyToBounds(bounds, { padding: [100, 100], maxZoom: 19, duration: 0.8 });
+    }
+
+    // Load trajectory
+    if (document.getElementById('layer-trajectory').checked) loadTrajectory(curDate);
+
+    // Update overlays
+    updateOverlays();
+
+    // Update hotspots
+    if (document.getElementById('layer-hotspots').checked) updateHotspots();
+
+    // Update stats
+    updateStats();
+
+    // Update result thumbnails
+    updateResultThumbs();
+
+    // Update colorbar
+    updateColorbar();
+
+    // Badge
+    document.getElementById('info-badge').innerHTML = `${dl} &middot; ${vl} &middot; ${curGP === 'stationary' ? 'RBF' : 'Gibbs'}`;
+}
+
+// ── TRAJECTORY ──
+async function loadTrajectory(dateKey) {
+    if (trajectoryLayer) { map.removeLayer(trajectoryLayer); trajectoryLayer = null; }
+
+    if (trajCache[dateKey]) { drawTrajectory(trajCache[dateKey]); return; }
+
+    try {
+        const resp = await fetch(`static/data/${dateKey}.csv`);
+        const text = await resp.text();
+        const lines = text.trim().split('\n');
+        const hdr = lines[0].split(',');
+        const li = hdr.findIndex(h => h.includes('Latitude'));
+        const lo = hdr.findIndex(h => h.includes('Longitude'));
+        const pts = [];
+        for (let i = 1; i < lines.length; i++) {
+            const c = lines[i].split(',');
+            const lat = parseFloat(c[li]), lon = parseFloat(c[lo]);
+            if (!isNaN(lat) && lat > 33) pts.push([lat, lon]);
+        }
+        trajCache[dateKey] = pts;
+        drawTrajectory(pts);
+    } catch(e) {}
+}
+
+function drawTrajectory(pts) {
+    trajectoryLayer = L.layerGroup();
+    const step = Math.max(1, Math.floor(pts.length / 200));
+    for (let i = 0; i < pts.length - step; i += step) {
+        const f = i / pts.length;
+        const r = Math.round(6 + 230*f), g = Math.round(182 - 50*f), b = Math.round(212 - 170*f);
+        L.polyline([pts[i], pts[Math.min(i+step, pts.length-1)]], {
+            color: `rgb(${r},${g},${b})`, weight: 3, opacity: 0.85
+        }).addTo(trajectoryLayer);
+    }
+    if (pts.length > 1) {
+        L.circleMarker(pts[0], { radius: 5, fillColor: '#06b6d4', color: '#fff', weight: 2, fillOpacity: 1 })
+            .bindTooltip('Start', { direction: 'top', offset: [0,-6] }).addTo(trajectoryLayer);
+        L.circleMarker(pts[pts.length-1], { radius: 5, fillColor: '#ef4444', color: '#fff', weight: 2, fillOpacity: 1 })
+            .bindTooltip('End', { direction: 'top', offset: [0,-6] }).addTo(trajectoryLayer);
+    }
+    trajectoryLayer.addTo(map);
+}
+
+function toggleTrajectory(show) {
+    if (show) loadTrajectory(curDate);
+    else if (trajectoryLayer) { map.removeLayer(trajectoryLayer); trajectoryLayer = null; }
+}
+
+// ── IMAGE OVERLAYS ──
+function updateOverlays() {
+    const entry = getEntry();
+    const bounds = getBounds();
+
+    // Mean overlay
+    if (meanOverlay) { map.removeLayer(meanOverlay); meanOverlay = null; }
+    if (entry && bounds && document.getElementById('layer-mean').checked) {
+        const url = imgPath('overlay_mean.png');
+        meanOverlay = L.imageOverlay(url, bounds, { opacity: overlayOpacity, interactive: false });
+        meanOverlay.addTo(map);
+    }
+
+    // Uncertainty overlay
+    if (uncertaintyOverlay) { map.removeLayer(uncertaintyOverlay); uncertaintyOverlay = null; }
+    if (entry && bounds && document.getElementById('layer-uncertainty').checked) {
+        const url = imgPath('overlay_uncertainty.png');
+        uncertaintyOverlay = L.imageOverlay(url, bounds, { opacity: overlayOpacity, interactive: false });
+        uncertaintyOverlay.addTo(map);
+    }
+}
+
+function toggleMean(show) { updateOverlays(); updateColorbar(); }
+function toggleUncertainty(show) { updateOverlays(); updateColorbar(); }
+
+// ── COLORBAR ──
+function updateColorbar() {
+    const cbFloat = document.getElementById('colorbar-float');
+    const cbImg = document.getElementById('colorbar-img');
+
+    const meanOn = document.getElementById('layer-mean').checked;
+    const uncOn = document.getElementById('layer-uncertainty').checked;
+
+    if (meanOn) {
+        cbImg.src = imgPath('colorbar_mean.png');
+        cbFloat.style.display = 'block';
+    } else if (uncOn) {
+        cbImg.src = imgPath('colorbar_uncertainty.png');
+        cbFloat.style.display = 'block';
+    } else {
+        cbFloat.style.display = 'none';
+    }
+}
+
+// ── HOTSPOT MARKERS ──
+function updateHotspots() {
+    if (hotspotsLayer) { map.removeLayer(hotspotsLayer); hotspotsLayer = null; }
+
+    const entry = getEntry();
+    if (!entry?.peaks) return;
+
+    hotspotsLayer = L.layerGroup();
+
+    entry.peaks.forEach(p => {
+        if (!p.significant) return;
+
+        const color = p.type === 'hot' ? '#ef4444' : '#3b82f6';
+        const fillColor = p.type === 'hot' ? '#fca5a5' : '#93c5fd';
+        const icon = p.type === 'hot' ? '\u25b2' : '\u25bc';
+        const typeLabel = p.type === 'hot' ? 'Hotspot' : 'Cold spot';
+
+        const marker = L.circleMarker([p.lat, p.lon], {
+            radius: 8, color: color, fillColor: fillColor,
+            fillOpacity: 0.7, weight: 2
+        });
+
+        const pvalStr = p.pvalue < 0.001 ? '< 0.001' : p.pvalue.toFixed(4);
+        const unit = VARS.find(v => v.key === curVar)?.unit || '';
+        marker.bindPopup(`
+            <div style="text-align:center;">
+                <div style="font-weight:700;color:${color};font-size:0.9rem;">${icon} ${typeLabel}</div>
+                <div style="margin-top:4px;font-size:0.82rem;">
+                    Value: <strong>${p.height.toFixed(4)} ${unit}</strong><br>
+                    p-value: <strong>${pvalStr}</strong>
+                </div>
+            </div>
+        `, { className: 'dark-popup' });
+
+        marker.addTo(hotspotsLayer);
+    });
+
+    hotspotsLayer.addTo(map);
+}
+
+function toggleHotspots(show) {
+    if (show) updateHotspots();
+    else if (hotspotsLayer) { map.removeLayer(hotspotsLayer); hotspotsLayer = null; }
+}
+
+// ── RESULT IMAGE THUMBNAILS ──
+function updateResultThumbs() {
+    const container = document.getElementById('rv-thumbs');
+    container.innerHTML = '';
+
+    const entry = getEntry();
+    if (!entry) return;
+
+    const prefix = `static/results/${entry.path_prefix}`;
+    const images = [
+        { file: 'mean.png', label: 'Mean' },
+        { file: 'uncertainty.png', label: 'Uncertainty' },
+        { file: 'hotspots.png', label: 'Hotspots' },
+    ];
+    // Add lengthscale fields for nonstationary
+    if (curGP === 'nonstationary') {
+        images.push({ file: 'l1_field.png', label: 'l1(x)' });
+        images.push({ file: 'l2_field.png', label: 'l2(x)' });
+    }
+    // Add trajectory versions
+    images.push({ file: 'mean_trajectory.png', label: 'Mean + Path' });
+
+    images.forEach(img => {
+        const div = document.createElement('div');
+        div.className = 'rv-thumb';
+        div.innerHTML = `<img src="${prefix}/${img.file}" alt="${img.label}" loading="lazy"><div class="rv-thumb-label">${img.label}</div>`;
+        div.onclick = () => {
+            document.getElementById('lb-img').src = `${prefix}/${img.file}`;
+            document.getElementById('lightbox').classList.add('active');
+        };
+        container.appendChild(div);
+    });
+
+    // Update title with value range
+    const rangeStr = entry.mean_range
+        ? `${entry.mean_range[0].toFixed(2)} - ${entry.mean_range[1].toFixed(2)}`
+        : '';
+    document.getElementById('rv-title').textContent = rangeStr ? `Results (${rangeStr})` : 'Results';
+}
+
+// ── STATS ──
+function updateStats() {
+    const entry = getEntry();
+    const gpLabel = curGP === 'stationary' ? 'Stationary' : 'Non-stationary';
+    document.getElementById('stats-title').textContent = `${gpLabel} \u2022 Kac-Rice`;
+
+    if (entry?.peaks) {
+        const peaks = entry.peaks;
+        const sigHot = peaks.filter(p => p.significant && p.type === 'hot').length;
+        const sigCold = peaks.filter(p => p.significant && p.type === 'cold').length;
+        const minP = peaks.length > 0 ? Math.min(...peaks.map(p => p.pvalue)) : 1;
+
+        document.getElementById('s-cand').textContent = peaks.length;
+        document.getElementById('s-hot').textContent = sigHot;
+        document.getElementById('s-cold').textContent = sigCold;
+        document.getElementById('s-pval').textContent = minP < 0.001 ? '< 0.001' : minP.toFixed(4);
+    } else {
+        // Fallback to summary JSON
+        const res = summaryData[curDate];
+        if (res) {
+            const e = res.find(r => r.variable === curVar && r.gp_type === curGP);
+            if (e) {
+                document.getElementById('s-cand').textContent = e.candidates;
+                document.getElementById('s-hot').textContent = e.hot;
+                document.getElementById('s-cold').textContent = e.cold;
+                document.getElementById('s-pval').textContent = e.min_pvalue < 0.001 ? '< 0.001' : e.min_pvalue.toFixed(4);
+                return;
+            }
+        }
+        ['s-cand','s-hot','s-cold','s-pval'].forEach(id => document.getElementById(id).textContent = '--');
+    }
+}
+
+// ── INIT ──
+async function init() {
+    await Promise.all([loadManifest(), loadSummaries()]);
+
+    // Zoom in from globe
+    setTimeout(() => {
+        document.getElementById('info-badge').textContent = 'Locating Tempe Town Lake...';
+        map.flyTo([33.431, -111.929], 16, { duration: 3 });
+        map.once('moveend', () => {
+            const bounds = getBounds();
+            if (bounds) {
+                map.flyToBounds(bounds, { padding: [100,100], maxZoom: 19, duration: 1.2 });
+            }
+            map.once('moveend', () => {
+                update();
+                // Auto-enable mean overlay after arrival
+                document.getElementById('layer-mean').checked = true;
+                updateOverlays();
+                updateColorbar();
+            });
+        });
+    }, 600);
+}
+
+init();
+
+// ESC closes lightbox
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('active');
+});
+</script>
+</body>
+</html>

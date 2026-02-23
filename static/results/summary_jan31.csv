@@ -1,0 +1,19 @@
+date,variable,variable_label,unit,gp_type,candidates,significant,hot,cold,min_pvalue
+jan31,CDOM,CDOM,ppb,stationary,12,11,5,6,0.0
+jan31,DO_conc,DO Conc.,mg/L,stationary,13,2,1,1,0.0
+jan31,DO_sat,DO Sat.,%,stationary,14,0,0,0,0.259664
+jan31,chlorophyll,Chlorophyll,μg/L,stationary,15,0,0,0,0.440152
+jan31,conductivity,Conductivity,μS/cm,stationary,1426,2,0,2,0.000133
+jan31,depth,Depth,m,stationary,13,7,1,6,0.0
+jan31,pH,pH,pH,stationary,10,9,5,4,0.0
+jan31,temperature,Temperature,°C,stationary,15,1,0,1,0.001706
+jan31,turbidity,Turbidity,NTU,stationary,15,8,3,5,0.0
+jan31,CDOM,CDOM,ppb,nonstationary,12,9,6,3,0.0
+jan31,DO_conc,DO Conc.,mg/L,nonstationary,12,4,3,1,0.0
+jan31,DO_sat,DO Sat.,%,nonstationary,12,0,0,0,0.74443
+jan31,chlorophyll,Chlorophyll,μg/L,nonstationary,13,0,0,0,0.56098
+jan31,conductivity,Conductivity,μS/cm,nonstationary,15,0,0,0,0.882057
+jan31,depth,Depth,m,nonstationary,12,8,0,8,0.0
+jan31,pH,pH,pH,nonstationary,28,8,4,4,0.0
+jan31,temperature,Temperature,°C,nonstationary,20,0,0,0,0.698063
+jan31,turbidity,Turbidity,NTU,nonstationary,12,8,3,5,0.0

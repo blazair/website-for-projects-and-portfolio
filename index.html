@@ -381,6 +381,30 @@
             line-height: 1;
         }
 
+        .shared-tools {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+        .shared-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--ink-faded);
+        }
+        .shared-chip {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 4px 12px;
+            border: 1.5px solid var(--ink);
+            color: var(--ink);
+            letter-spacing: 0.3px;
+        }
+
         /* ========================================
            PUBLICATION
            ======================================== */
@@ -539,11 +563,28 @@
             color: var(--ink);
         }
 
-        .pdf-viewer {
+        .pdf-viewer-container {
             width: 100%;
-            height: 400px;
-            border: none;
+            max-height: 600px;
+            overflow-y: auto;
+            background: #525659;
+        }
+
+        .pdf-viewer-container canvas {
             display: block;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+
+        .pdf-page-gap {
+            height: 8px;
+        }
+
+        .pdf-loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--ink-faded);
+            font-family: var(--body);
         }
 
         /* ========================================
@@ -680,6 +721,7 @@
             font-size: 12px;
             color: var(--olive);
         }
+
 
         /* ========================================
            SKILLS
@@ -1037,7 +1079,7 @@
                         </p>
                         <div class="btn-row">
                             <a href="https://github.com/DREAMS-lab/aquatic-mapping" target="_blank" class="btn">View Code</a>
-                            <a href="/static/icra-paper.pdf" target="_blank" class="btn btn-primary">Read Paper</a>
+                            <a href="static/icra-paper.pdf" target="_blank" class="btn btn-primary">Read Paper</a>
                         </div>
                     </div>
                 </div>
@@ -1045,9 +1087,11 @@
                 <div class="pdf-container reveal">
                     <div class="pdf-header">
                         <span class="pdf-title">Paper Preview</span>
-                        <a href="/static/icra-paper.pdf" download class="pdf-download">Download PDF</a>
+                        <a href="static/icra-paper.pdf" download class="pdf-download">Download PDF</a>
                     </div>
-                    <embed src="/static/icra-paper.pdf" type="application/pdf" class="pdf-viewer">
+                    <div id="pdf-viewer" class="pdf-viewer-container">
+                        <p class="pdf-loading">Loading paper preview...</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1057,7 +1101,13 @@
             <div class="container">
                 <div class="section-header reveal">
                     <span class="section-tag">Active Work</span>
-                    <h2 class="section-title">Current Project</h2>
+                    <h2 class="section-title">Current Projects</h2>
+                    <div class="shared-tools">
+                        <span class="shared-label">Shared Infrastructure:</span>
+                        <span class="shared-chip">Docker Containers</span>
+                        <span class="shared-chip">GP Reconstruction</span>
+                        <span class="shared-chip">Web Dashboard</span>
+                    </div>
                 </div>
 
                 <div class="project-hero">
@@ -1088,33 +1138,46 @@
                             <span class="project-tag">PX4</span>
                         </div>
                         <div class="btn-row">
-                            <a href="dashboard.html" class="btn btn-primary" id="dashboardBtn">Live Dashboard</a>
+                            <a href="/dashboard" class="btn btn-primary" id="dashboardBtn" onclick="return checkDashboard(event)">Live Dashboard</a>
                             <a href="https://github.com/DREAMS-lab/aquatic-mapping" target="_blank" class="btn">GitHub</a>
                         </div>
                     </div>
                 </div>
 
-                <!-- Deployment Boxes -->
-                <div class="deployment-grid">
-                    <div class="deploy-box reveal float-anim">
-                        <span class="deploy-icon">&#128230;</span>
-                        <h4 class="deploy-title">Docker Containers</h4>
-                        <p class="deploy-desc">Isolated simulation environments for each trial with ROS 2 Humble, Gazebo, and PX4 SITL</p>
-                        <div class="deploy-stat">Up to 5 concurrent trials</div>
+                <div class="project-hero">
+                    <div class="project-visual reveal-scale">
+                        <svg viewBox="0 0 64 64">
+                            <path d="M8 32 Q16 24 24 32 Q32 40 40 32 Q48 24 56 32" fill="none" stroke="white" stroke-width="2" opacity="0.9"/>
+                            <path d="M8 38 Q16 30 24 38 Q32 46 40 38 Q48 30 56 38" fill="none" stroke="white" stroke-width="2" opacity="0.6"/>
+                            <path d="M8 44 Q16 36 24 44 Q32 52 40 44 Q48 36 56 44" fill="none" stroke="white" stroke-width="2" opacity="0.3"/>
+                            <circle cx="20" cy="22" r="4" fill="white" opacity="0.8"/>
+                            <circle cx="44" cy="20" r="3" fill="white" opacity="0.6"/>
+                            <circle cx="32" cy="18" r="2.5" fill="white" opacity="0.5"/>
+                            <path d="M16 28 L20 22 L24 26" fill="none" stroke="white" stroke-width="1.5" opacity="0.7"/>
+                        </svg>
                     </div>
-                    <div class="deploy-box reveal float-anim">
-                        <span class="deploy-icon">&#128200;</span>
-                        <h4 class="deploy-title">GP Reconstruction</h4>
-                        <p class="deploy-desc">Compare Standard GP, McHutchon NIGP, and Girard methods across multiple kernels</p>
-                        <div class="deploy-stat">15+ method/kernel combos</div>
-                    </div>
-                    <div class="deploy-box reveal float-anim">
-                        <span class="deploy-icon">&#127760;</span>
-                        <h4 class="deploy-title">Web Dashboard</h4>
-                        <p class="deploy-desc">Real-time trial management, VNC access, results visualization, and RMSE metrics</p>
-                        <div class="deploy-stat">Live system monitoring</div>
+                    <div class="project-info reveal-right">
+                        <h3>Spatio-Temporal Analysis of Tempe Town Lake</h3>
+                        <p class="project-desc">
+                            Water quality reconstruction from autonomous surface vehicle survey data using Gaussian Process
+                            regression with Kac-Rice hotspot detection. Stationary and non-stationary kernel comparison
+                            across multiple environmental variables.
+                        </p>
+                        <div class="project-tags">
+                            <span class="project-tag">GPyTorch</span>
+                            <span class="project-tag">Kac-Rice</span>
+                            <span class="project-tag">Leaflet</span>
+                            <span class="project-tag">Spatial Statistics</span>
+                            <span class="project-tag">Python</span>
+                        </div>
+                        <div class="btn-row">
+                            <a href="survey.html" class="btn btn-primary">View Survey</a>
+                            <a href="https://github.com/DREAMS-lab/aquatic-mapping" target="_blank" class="btn">GitHub</a>
+                        </div>
                     </div>
                 </div>
+
+                <!-- deployment boxes removed, replaced by shared-tools strip in section header -->
             </div>
         </div>
 
@@ -1456,6 +1519,71 @@
             });
         });
 
+        // ========================================
+        // DASHBOARD OFFLINE CHECK
+        // ========================================
+        async function checkDashboard(event) {
+            event.preventDefault();
+            const btn = document.getElementById('dashboardBtn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Checking...';
+            btn.style.pointerEvents = 'none';
+
+            try {
+                // Use health endpoint (no auth required) to check if backend is online
+                const response = await fetch('/api/health', {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(5000)
+                });
+
+                if (response.ok) {
+                    // Backend is online - redirect to login page
+                    window.location.href = '/login';
+                } else {
+                    alert('Host PC is offline. Please start the backend server.');
+                    btn.textContent = originalText;
+                    btn.style.pointerEvents = '';
+                }
+            } catch (error) {
+                alert('Host PC is offline. The control panel is only available when the backend server is running.');
+                btn.textContent = originalText;
+                btn.style.pointerEvents = '';
+            }
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        (function() {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            const container = document.getElementById('pdf-viewer');
+            const pdfUrl = 'static/icra-paper.pdf';
+
+            pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+                container.innerHTML = '';
+                const maxPages = Math.min(pdf.numPages, 3);
+                let chain = Promise.resolve();
+                for (let i = 1; i <= maxPages; i++) {
+                    chain = chain.then(function() {
+                        return pdf.getPage(i).then(function(page) {
+                            const scale = container.clientWidth / page.getViewport({scale: 1}).width;
+                            const viewport = page.getViewport({scale: scale});
+                            const canvas = document.createElement('canvas');
+                            canvas.width = viewport.width;
+                            canvas.height = viewport.height;
+                            container.appendChild(canvas);
+                            if (i < maxPages) {
+                                const gap = document.createElement('div');
+                                gap.className = 'pdf-page-gap';
+                                container.appendChild(gap);
+                            }
+                            return page.render({canvasContext: canvas.getContext('2d'), viewport: viewport}).promise;
+                        });
+                    });
+                }
+            }).catch(function(err) {
+                container.innerHTML = '<p class="pdf-loading">Unable to load PDF preview. <a href="' + pdfUrl + '" target="_blank" style="color:var(--olive)">Open PDF directly</a></p>';
+            });
+        })();
     </script>
 </body>
 </html>
