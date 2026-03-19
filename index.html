@@ -2228,12 +2228,14 @@
             btn.style.pointerEvents = 'none';
 
             try {
-                const response = await fetch((BACKEND_URL || '') + '/api/health', {
+                const base = BACKEND_URL || '';
+                const response = await fetch(base + '/api/health', {
                     method: 'GET',
                     signal: AbortSignal.timeout(5000)
                 });
-                if (response.ok) {
-                    window.location.href = (BACKEND_URL || '') + '/login';
+                const data = await response.json();
+                if (response.ok && data.status === 'online') {
+                    window.location.href = base + '/login';
                 } else {
                     showNotification('Host PC is offline. Please start the backend server.');
                     btn.textContent = orig;
