@@ -463,6 +463,30 @@
             transform: scale(1.02);
         }
 
+        .shared-tools {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+        .shared-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--ink-faded);
+        }
+        .shared-chip {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 4px 12px;
+            border: 1.5px solid var(--ink);
+            color: var(--ink);
+            letter-spacing: 0.3px;
+        }
+
         /* ========================================
            ABOUT SECTION
            ======================================== */
@@ -1485,6 +1509,8 @@
                         <a href="https://github.com/DREAMS-lab/active_mapping_3D" target="_blank" class="btn btn-outline">GitHub</a>
                     </div>
                 </div>
+
+                <!-- deployment boxes removed, replaced by shared-tools strip in section header -->
             </div>
         </div>
     </section>
@@ -2308,6 +2334,40 @@
         }
 
         renderPdf(pdfUrls[currentPdf]);
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        (function() {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            const container = document.getElementById('pdf-viewer');
+            const pdfUrl = 'static/icra-paper.pdf';
+
+            pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+                container.innerHTML = '';
+                const maxPages = Math.min(pdf.numPages, 3);
+                let chain = Promise.resolve();
+                for (let i = 1; i <= maxPages; i++) {
+                    chain = chain.then(function() {
+                        return pdf.getPage(i).then(function(page) {
+                            const scale = container.clientWidth / page.getViewport({scale: 1}).width;
+                            const viewport = page.getViewport({scale: scale});
+                            const canvas = document.createElement('canvas');
+                            canvas.width = viewport.width;
+                            canvas.height = viewport.height;
+                            container.appendChild(canvas);
+                            if (i < maxPages) {
+                                const gap = document.createElement('div');
+                                gap.className = 'pdf-page-gap';
+                                container.appendChild(gap);
+                            }
+                            return page.render({canvasContext: canvas.getContext('2d'), viewport: viewport}).promise;
+                        });
+                    });
+                }
+            }).catch(function(err) {
+                container.innerHTML = '<p class="pdf-loading">Unable to load PDF preview. <a href="' + pdfUrl + '" target="_blank" style="color:var(--olive)">Open PDF directly</a></p>';
+            });
+        })();
     </script>
 </body>
 </html>

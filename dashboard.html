@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Bharath Desikan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0d0d0d;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+        }
+        .power-icon {
+            font-size: 80px;
+            color: #333;
+            margin-bottom: 24px;
+            transition: color 0.3s;
+        }
+        .power-icon.checking {
+            color: #f97316;
+            animation: pulse 1.5s infinite;
+        }
+        .power-icon.online {
+            color: #22c55e;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            font-size: 14px;
+            color: #444;
+            margin-bottom: 32px;
+        }
+        .retry-btn {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #888;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .retry-btn:hover {
+            background: #252525;
+            border-color: #555;
+            color: #ccc;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #555;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #999; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="icon">
+            <i class="fas fa-power-off power-icon" id="power"></i>
+        </div>
+        <h1 id="title">PC Offline</h1>
+        <p class="subtitle" id="status">Waiting for connection...</p>
+        <button class="retry-btn" id="retryBtn" onclick="checkBackend()">
+            <i class="fas fa-refresh" style="margin-right:8px"></i>Retry
+        </button>
+        <br>
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left" style="margin-right:6px"></i>Back to Portfolio</a>
+    </div>
+
+    <script>
+        const API = 'https://api.bharathdesikan.com';
+        const power = document.getElementById('power');
+        const title = document.getElementById('title');
+        const status = document.getElementById('status');
+        const retryBtn = document.getElementById('retryBtn');
+
+        async function checkBackend() {
+            power.className = 'fas fa-power-off power-icon checking';
+            status.textContent = 'Checking...';
+            retryBtn.disabled = true;
+
+            try {
+                const res = await fetch(API + '/api/health', { signal: AbortSignal.timeout(5000) });
+                if (res.ok) {
+                    power.className = 'fas fa-power-off power-icon online';
+                    title.textContent = 'PC Online';
+                    status.textContent = 'Redirecting to dashboard...';
+                    retryBtn.style.display = 'none';
+                    setTimeout(() => {
+                        window.location.href = API + '/login';
+                    }, 800);
+                    return;
+                }
+            } catch (e) {}
+
+            power.className = 'fas fa-power-off power-icon';
+            title.textContent = 'PC Offline';
+            status.textContent = 'Backend is not running';
+            retryBtn.disabled = false;
+        }
+
+        // Check on load
+        checkBackend();
+
+        // Auto-retry every 10 seconds
+        setInterval(checkBackend, 10000);
+    </script>
+</body>
+</html>
