@@ -1,0 +1,94 @@
+{
+  "gp_type": "nonstationary",
+  "variable_label": "Depth (m)",
+  "unit": "m",
+  "bounds": [
+    [
+      33.43034442901409,
+      -111.92846394335353
+    ],
+    [
+      33.43053313645296,
+      -111.92819506525541
+    ]
+  ],
+  "mean_range": [
+    0.032209523022174835,
+    0.05289650708436966
+  ],
+  "uncertainty_range": [
+    0.004817774053663015,
+    0.024927230551838875
+  ],
+  "grid_size": 150,
+  "peaks": [
+    {
+      "lat": 33.43039963242009,
+      "lon": -111.92845358972663,
+      "type": "hot",
+      "height": 0.0522,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.430476232629665,
+      "lon": -111.92843290677816,
+      "type": "hot",
+      "height": 0.0529,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.430357228135186,
+      "lon": -111.92842626684805,
+      "type": "hot",
+      "height": 0.0511,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43047251888361,
+      "lon": -111.92825910745884,
+      "type": "hot",
+      "height": 0.0453,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43039141062186,
+      "lon": -111.92838005429998,
+      "type": "cold",
+      "height": 0.0325,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43044947881641,
+      "lon": -111.92832335047535,
+      "type": "cold",
+      "height": 0.0322,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43044037986091,
+      "lon": -111.92819964978374,
+      "type": "cold",
+      "height": 0.0392,
+      "pvalue": 0.457584,
+      "significant": false
+    },
+    {
+      "lat": 33.43040074534657,
+      "lon": -111.92830491237811,
+      "type": "hot",
+      "height": 0.0408,
+      "pvalue": 0.586199,
+      "significant": false
+    }
+  ],
+  "overlay_mean": "overlay_mean.png",
+  "overlay_uncertainty": "overlay_uncertainty.png",
+  "colorbar_mean": "colorbar_mean.png",
+  "colorbar_uncertainty": "colorbar_uncertainty.png"
+}

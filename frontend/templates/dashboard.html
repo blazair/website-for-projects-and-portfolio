@@ -3,1129 +3,751 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terminal - Control Panel</title>
+    <title>Aquatic Mapping Dashboard</title>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --bg: #0a0e14;
-            --bg-light: #141920;
-            --bg-lighter: #1a1f29;
-            --border: #1f2430;
-            --text: #c5c8c6;
-            --text-dim: #6c7680;
-            --accent: #00ff9f;
-            --accent-dim: #00cc7f;
-            --red: #ff3333;
-            --yellow: #ffb454;
-            --blue: #59c2ff;
-            --purple: #c678dd;
+            --base: #0f1117; --card: #161922; --elevated: #1c2030; --border: #262d3d;
+            --accent: #3b82f6; --accent-dim: #2563eb;
+            --green: #22c55e; --red: #ef4444; --yellow: #eab308; --orange: #f97316;
+            --text: #e2e8f0; --text-dim: #64748b; --text-muted: #475569;
         }
-
         [x-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; background: var(--base); color: var(--text); min-height: 100vh; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
 
-        body {
-            font-family: 'JetBrains Mono', monospace;
-            background: var(--bg);
-            color: var(--text);
-            font-size: 13px;
-            line-height: 1.5;
-            min-height: 100vh;
-        }
-
-        /* Terminal Header */
+        /* Header */
         .header {
-            background: var(--bg-light);
-            border-bottom: 1px solid var(--border);
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            background: var(--card); border-bottom: 1px solid var(--border);
+            padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
         }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .prompt {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .prompt-path {
-            color: var(--blue);
-        }
-
-        .header-nav {
-            display: flex;
-            gap: 8px;
-        }
-
+        .header-left { display: flex; align-items: center; gap: 24px; }
+        .logo { font-size: 15px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+        .logo i { color: var(--accent); }
+        .tabs { display: flex; gap: 4px; }
         .tab-btn {
-            padding: 6px 12px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            color: var(--text-dim);
-            background: transparent;
-            border: 1px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s;
+            padding: 8px 16px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+            color: var(--text-dim); background: transparent; border: none; border-radius: 6px;
+            cursor: pointer; transition: all 0.15s;
         }
+        .tab-btn:hover { color: var(--text); background: var(--elevated); }
+        .tab-btn.active { color: var(--accent); background: rgba(59,130,246,0.1); }
+        .header-right { display: flex; align-items: center; gap: 12px; font-size: 12px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .status-dot.online { background: var(--green); }
+        .status-dot.offline { background: var(--red); }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .status-dot.pulse { animation: pulse 2s infinite; }
 
-        .tab-btn:hover {
-            color: var(--accent);
-            background: var(--bg-lighter);
+        /* Main */
+        .main { padding: 20px 24px; max-width: 1600px; margin: 0 auto; }
+
+        /* Cards */
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+        .card-header {
+            padding: 12px 16px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 13px; font-weight: 600;
         }
-
-        .tab-btn.active {
-            color: var(--accent);
-            border-color: var(--accent);
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 11px;
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--accent);
-        }
-
-        .dot.offline { background: var(--red); }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
-        .dot.pulse { animation: pulse 2s infinite; }
-
-        /* Main Layout */
-        .main {
-            padding: 20px;
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        /* System Stats Bar */
-        .stats-bar {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: var(--bg-light);
-            border: 1px solid var(--border);
-            padding: 12px 16px;
-        }
-
-        .stat-label {
-            font-size: 10px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-        }
-
-        .stat-value {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--accent);
-            margin-bottom: 8px;
-        }
-
-        .stat-bar {
-            height: 2px;
-            background: var(--bg);
-            border-radius: 1px;
-            overflow: hidden;
-        }
-
-        .stat-fill {
-            height: 100%;
-            background: var(--accent);
-            transition: width 0.5s ease;
-        }
-
-        /* Terminal Panel */
-        .panel {
-            background: var(--bg-light);
-            border: 1px solid var(--border);
-            margin-bottom: 16px;
-        }
-
-        .panel-header {
-            padding: 10px 16px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .panel-title {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .panel-title i {
-            color: var(--accent);
-            font-size: 11px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            font-size: 10px;
-            background: var(--bg);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
-
-        .panel-body {
-            padding: 16px;
-        }
-
-        /* Grid Layouts */
-        .grid-3 {
-            display: grid;
-            grid-template-columns: 280px 1fr 1fr;
-            gap: 16px;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
+        .card-header i { color: var(--accent); margin-right: 8px; font-size: 12px; }
+        .card-body { padding: 16px; }
 
         /* Buttons */
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 8px 14px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            background: transparent;
-            color: var(--text);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 14px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+            border: 1px solid var(--border); border-radius: 6px; cursor: pointer;
+            transition: all 0.15s; background: var(--elevated); color: var(--text);
         }
-
-        .btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: var(--bg);
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-dim);
-            border-color: var(--accent-dim);
-        }
-
-        .btn-danger {
-            border-color: var(--red);
-            color: var(--red);
-        }
-
-        .btn-danger:hover {
-            background: var(--red);
-            color: var(--bg);
-        }
-
-        .btn-sm {
-            padding: 4px 8px;
-            font-size: 10px;
-        }
-
-        .btn-block {
-            width: 100%;
-        }
-
-        .btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
+        .btn:hover { border-color: var(--accent); color: var(--accent); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-green { background: var(--green); border-color: var(--green); color: #000; }
+        .btn-green:hover { background: #16a34a; border-color: #16a34a; color: #000; }
+        .btn-red { background: var(--red); border-color: var(--red); color: #fff; }
+        .btn-red:hover { background: #dc2626; border-color: #dc2626; }
+        .btn-yellow { background: var(--yellow); border-color: var(--yellow); color: #000; }
+        .btn-yellow:hover { background: #ca8a04; border-color: #ca8a04; color: #000; }
+        .btn-accent { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .btn-accent:hover { background: var(--accent-dim); border-color: var(--accent-dim); }
+        .btn-sm { padding: 4px 10px; font-size: 11px; }
+        .btn-block { width: 100%; justify-content: center; }
 
         /* Forms */
-        .form-group {
-            margin-bottom: 12px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 10px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-        }
-
+        .form-label { display: block; font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 500; }
         .form-input, .form-select {
-            width: 100%;
-            padding: 8px 10px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            transition: border-color 0.2s;
+            width: 100%; padding: 8px 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+            background: var(--base); border: 1px solid var(--border); border-radius: 4px; color: var(--text);
+        }
+        .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent); }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 6px; }
+        .checkbox-label {
+            display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-dim);
+            cursor: pointer; padding: 4px 8px; background: var(--base); border: 1px solid var(--border);
+            border-radius: 4px; transition: all 0.15s;
+        }
+        .checkbox-label:has(input:checked) { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.08); }
+        .checkbox-label input { display: none; }
+
+        /* Progress bar */
+        .progress { height: 6px; background: var(--base); border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+        .progress-fill.green { background: var(--green); }
+        .progress-fill.blue { background: var(--accent); }
+        .progress-fill.yellow { background: var(--yellow); }
+        .progress-fill.red { background: var(--red); }
+
+        /* Grid */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+        /* Worker cards */
+        .worker-card { border: 1px solid var(--border); border-radius: 6px; padding: 12px; background: var(--elevated); }
+        .worker-card .worker-title { font-size: 12px; font-weight: 600; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .worker-card .worker-job { font-size: 11px; color: var(--text-dim); margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
+        .worker-card .worker-actions { display: flex; gap: 4px; margin-top: 8px; }
+        .worker-card .progress-img { width: 100%; border-radius: 4px; margin-top: 8px; border: 1px solid var(--border); }
+
+        /* Status bar */
+        .status-bar { display: flex; gap: 24px; padding: 12px 16px; background: var(--elevated); border-radius: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+        .status-item { display: flex; flex-direction: column; gap: 2px; }
+        .status-item .label { font-size: 10px; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.5px; }
+        .status-item .value { font-size: 16px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+        .status-item .value.green { color: var(--green); }
+        .status-item .value.red { color: var(--red); }
+        .status-item .value.yellow { color: var(--yellow); }
+        .status-item .value.blue { color: var(--accent); }
+
+        /* Log panel */
+        .log-panel {
+            background: var(--base); border: 1px solid var(--border); border-radius: 4px;
+            padding: 12px; max-height: 300px; overflow-y: auto; font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; line-height: 1.6; color: var(--text-dim);
         }
 
-        .form-input:focus, .form-select:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
+        /* Job queue table */
+        .table-wrap { overflow-x: auto; max-height: 350px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th { text-align: left; padding: 8px 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); border-bottom: 1px solid var(--border); background: var(--card); position: sticky; top: 0; z-index: 1; }
+        td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
+        tr:hover td { background: var(--elevated); }
+        .badge { display: inline-block; padding: 2px 8px; font-size: 10px; border-radius: 3px; font-weight: 500; }
+        .badge-running { background: rgba(59,130,246,0.15); color: var(--accent); }
+        .badge-completed { background: rgba(34,197,94,0.15); color: var(--green); }
+        .badge-failed { background: rgba(239,68,68,0.15); color: var(--red); }
+        .badge-pending { background: rgba(100,116,139,0.15); color: var(--text-dim); }
 
-        .form-range {
-            width: 100%;
-            -webkit-appearance: none;
-            height: 2px;
-            background: var(--bg);
-            border-radius: 1px;
-            margin-top: 8px;
-        }
+        /* Stats cards */
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+        .stat-card .stat-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 8px; }
+        .stat-card .stat-value { font-size: 24px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--accent); margin-bottom: 8px; }
 
-        .form-range::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
-            background: var(--accent);
-            cursor: pointer;
-            border-radius: 2px;
-        }
-
-        /* Trial Items */
-        .trial-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 12px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            margin-bottom: 8px;
-            transition: all 0.2s;
-        }
-
-        .trial-item:hover {
-            border-color: var(--accent);
-        }
-
-        .trial-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .trial-icon {
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg-lighter);
-            color: var(--text-dim);
-            font-size: 12px;
-        }
-
-        .trial-icon.running {
-            background: var(--accent);
-            color: var(--bg);
-        }
-
-        .trial-name {
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .trial-status {
-            font-size: 10px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-        }
-
-        .trial-status.running { color: var(--accent); }
-
-        .trial-actions {
-            display: flex;
-            gap: 4px;
-        }
-
-        /* Table */
-        .table-wrap {
-            overflow-x: auto;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11px;
-        }
-
-        th {
-            text-align: left;
-            padding: 8px 10px;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-dim);
-            border-bottom: 1px solid var(--border);
-            background: var(--bg);
-            position: sticky;
-            top: 0;
-        }
-
-        td {
-            padding: 8px 10px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        tr:hover td {
-            background: var(--bg);
-        }
-
-        .badge-method {
-            padding: 2px 6px;
-            font-size: 9px;
-            border: 1px solid;
-        }
-
-        .badge-blue { border-color: var(--blue); color: var(--blue); }
-        .badge-purple { border-color: var(--purple); color: var(--purple); }
-        .badge-yellow { border-color: var(--yellow); color: var(--yellow); }
-
-        .text-best {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        /* Filters */
-        .filters-inline {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-            padding: 12px 16px;
-            background: var(--bg);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .filter-group {
-            flex: 1;
-        }
-
-        .filter-group label {
-            display: block;
-            font-size: 9px;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            margin-bottom: 4px;
-        }
-
-        .filter-group select {
-            width: 100%;
-            padding: 6px 8px;
-            font-size: 11px;
-        }
-
-        /* Summary Boxes */
-        .summary-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-
-        .summary-box {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            padding: 10px;
-            text-align: center;
-        }
-
-        .summary-label {
-            font-size: 9px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-
-        .summary-value {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--accent);
-        }
-
-        /* Image Grid */
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 8px;
-            max-height: 300px;
-            overflow-y: auto;
-            padding: 12px;
-        }
-
+        /* Image grid */
+        .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
         .image-card {
-            aspect-ratio: 1;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.2s;
+            border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+            cursor: pointer; transition: all 0.15s; background: var(--card);
         }
+        .image-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .image-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+        .image-card .image-label { padding: 8px 10px; font-size: 11px; color: var(--text-dim); text-align: center; }
 
-        .image-card:hover {
-            border-color: var(--accent);
+        /* Trial cards */
+        .trial-card {
+            border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+            cursor: pointer; transition: all 0.15s; background: var(--card);
         }
+        .trial-card:hover { border-color: var(--accent); }
+        .trial-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; background: var(--base); }
+        .trial-card .trial-card-body { padding: 10px 12px; }
+        .trial-card .trial-card-title { font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+        .trial-card .trial-card-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 10px; font-family: 'JetBrains Mono', monospace; }
+        .trial-card .trial-card-metrics .metric-label { color: var(--text-dim); }
+        .trial-card .trial-card-metrics .metric-value { color: var(--green); text-align: right; }
 
-        .image-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        /* Lightbox */
+        .lightbox {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 10000;
+            display: flex; align-items: center; justify-content: center; padding: 30px;
         }
+        .lightbox img { max-width: 95%; max-height: 95%; border-radius: 4px; }
+        .lightbox-close { position: absolute; top: 16px; right: 20px; color: var(--text); font-size: 28px; cursor: pointer; background: none; border: none; }
 
         /* Modal */
         .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(10, 14, 20, 0.95);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9000;
+            display: flex; align-items: center; justify-content: center; padding: 30px;
         }
+        .modal-content {
+            background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+            max-width: 1100px; width: 100%; max-height: 90vh; overflow-y: auto;
+        }
+        .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 20px; }
+        .modal-close { background: none; border: none; color: var(--text-dim); font-size: 20px; cursor: pointer; }
 
-        .modal-overlay img {
-            max-width: 100%;
-            max-height: 100%;
-            border: 1px solid var(--border);
+        /* VNC link cards */
+        .vnc-card {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 12px; background: var(--elevated); border: 1px solid var(--border);
+            border-radius: 6px; margin-bottom: 8px;
         }
-
-        .modal-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: var(--text);
-            font-size: 24px;
-            cursor: pointer;
-        }
+        .vnc-card .vnc-label { font-size: 12px; font-weight: 500; }
+        .vnc-card .vnc-port { font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
 
         /* Toast */
-        .toast-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 10001;
-        }
-
-        .toast {
-            background: var(--bg-light);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px 16px;
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 11px;
-        }
-
+        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 10001; display: flex; flex-direction: column; gap: 8px; }
+        .toast { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 16px; border-radius: 6px; display: flex; align-items: center; gap: 8px; font-size: 12px; min-width: 250px; }
         .toast.error { border-color: var(--red); }
-        .toast.success { border-color: var(--accent); }
+        .toast.success { border-color: var(--green); }
+        .toast i.fa-check-circle { color: var(--green); }
+        .toast i.fa-times-circle { color: var(--red); }
+        .toast i.fa-info-circle { color: var(--accent); }
 
-        .toast i {
-            color: var(--accent);
-        }
+        /* Filter bar */
+        .filter-bar { display: flex; gap: 12px; align-items: flex-end; padding: 12px 0; flex-wrap: wrap; }
+        .filter-bar .filter-group { flex: 1; min-width: 140px; }
+        .filter-bar .filter-group label { display: block; font-size: 10px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+        .filter-bar .filter-group select, .filter-bar .filter-group input { width: 100%; padding: 6px 8px; font-size: 11px; background: var(--base); border: 1px solid var(--border); border-radius: 4px; color: var(--text); }
+        .filter-bar .filter-group select:focus, .filter-bar .filter-group input:focus { outline: none; border-color: var(--accent); }
 
-        .toast.error i { color: var(--red); }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-dim);
-        }
-
-        .empty-state i {
-            font-size: 32px;
-            margin-bottom: 12px;
-            opacity: 0.3;
-        }
-
-        /* VNC Status Grid */
-        .vnc-status-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .vnc-status-item {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            padding: 10px;
-            font-size: 11px;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 11px;
-        }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
-        .info-label {
-            color: var(--text-dim);
-        }
+        /* CSV table colors */
+        .effect-large { color: var(--green); font-weight: 600; }
+        .effect-medium { color: var(--yellow); }
+        .effect-small { color: var(--orange); }
+        .effect-negligible { color: var(--red); }
+        .p-significant { color: var(--green); font-weight: 600; }
 
         /* Responsive */
-        @media (max-width: 1100px) {
-            .grid-3 {
-                grid-template-columns: 260px 1fr;
-            }
-
-            .grid-3 > *:nth-child(3) {
-                grid-column: 1 / -1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .grid-3, .grid-2 {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-bar {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 12px;
-            }
-
-            .header-nav {
-                flex-wrap: wrap;
-            }
-
-            .filters-inline {
-                flex-wrap: wrap;
-            }
-        }
+        @media (max-width: 1100px) { .grid-3 { grid-template-columns: 1fr 1fr; } .grid-4 { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } .header { padding: 0 12px; } .main { padding: 12px; } .tabs { flex-wrap: wrap; } .status-bar { gap: 12px; } }
     </style>
 </head>
-<body x-data="dashboard()" x-init="init()">
-    <!-- Terminal Header -->
+<body x-data="dashboard()" x-init="init()" @keydown.escape.window="lightbox.show = false; trialModal.show = false">
+
+    <!-- Header -->
     <header class="header">
         <div class="header-left">
-            <div>
-                <span class="prompt" x-text="(sessionStorage.getItem('username') || 'user') + '@control'">user@control</span>
-                <span class="prompt-path">~/aquatic-mapping</span>
-                <span style="color: var(--text);">$</span>
-            </div>
-            <nav class="header-nav">
-                <button @click="currentTab = 'simulations'" :class="currentTab === 'simulations' ? 'active' : ''" class="tab-btn">
-                    simulations
+            <div class="logo"><i class="fas fa-water"></i> Aquatic Mapping</div>
+            <nav class="tabs">
+                <button @click="tab = 'manager'" :class="tab === 'manager' ? 'active' : ''" class="tab-btn">
+                    <i class="fas fa-play-circle"></i> Trial Manager
                 </button>
-                <button @click="currentTab = 'reconstruction'" :class="currentTab === 'reconstruction' ? 'active' : ''" class="tab-btn">
-                    reconstruction
+                <button @click="tab = 'results'" :class="tab === 'results' ? 'active' : ''" class="tab-btn">
+                    <i class="fas fa-chart-bar"></i> Results
                 </button>
-                <button @click="currentTab = 'host'" :class="currentTab === 'host' ? 'active' : ''" class="tab-btn">
-                    host
+                <button @click="tab = 'system'" :class="tab === 'system' ? 'active' : ''" class="tab-btn">
+                    <i class="fas fa-server"></i> System
                 </button>
             </nav>
         </div>
-
         <div class="header-right">
-            <div class="status-indicator">
-                <span class="dot" :class="connected ? 'pulse' : 'offline'"></span>
-                <span x-text="connected ? 'online' : 'offline'"></span>
-            </div>
-            <button @click="logout()" class="btn btn-sm" style="margin-left: 10px;">
-                <i class="fas fa-sign-out-alt"></i> logout
-            </button>
+            <span class="status-dot" :class="connected ? 'online pulse' : 'offline'"></span>
+            <span x-text="connected ? 'Connected' : 'Disconnected'" style="font-size: 12px;"></span>
+            <button @click="logout()" class="btn btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
     </header>
 
     <main class="main">
-        <!-- System Stats -->
-        <div class="stats-bar">
-            <div class="stat-card">
-                <div class="stat-label">cpu</div>
-                <div class="stat-value" x-text="system.cpu_percent + '%'">0%</div>
-                <div class="stat-bar">
-                    <div class="stat-fill" :style="'width: ' + system.cpu_percent + '%'"></div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">memory</div>
-                <div class="stat-value" x-text="system.memory_used_gb + '/' + system.memory_total_gb + ' GB'">0/0 GB</div>
-                <div class="stat-bar">
-                    <div class="stat-fill" :style="'width: ' + system.memory_percent + '%'"></div>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">gpu</div>
-                <template x-if="system.gpu">
-                    <div>
-                        <div class="stat-value" x-text="system.gpu.utilization + '%'">0%</div>
-                        <div class="stat-bar">
-                            <div class="stat-fill" :style="'width: ' + system.gpu.utilization + '%'"></div>
+
+        <!-- ================================================================ -->
+        <!-- TAB 1: TRIAL MANAGER -->
+        <!-- ================================================================ -->
+        <div x-show="tab === 'manager'" x-cloak>
+
+            <!-- Config Panel -->
+            <div class="card" style="margin-bottom: 16px;">
+                <div class="card-header"><span><i class="fas fa-cog"></i> Configuration</span></div>
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: auto auto auto 1fr 1fr; gap: 16px; align-items: end;">
+                        <!-- Trial Range -->
+                        <div>
+                            <label class="form-label">Start Trial</label>
+                            <input type="number" x-model.number="config.start_trial" min="1" class="form-input" style="width: 80px;">
+                        </div>
+                        <div>
+                            <label class="form-label">End Trial</label>
+                            <input type="number" x-model.number="config.end_trial" min="1" class="form-input" style="width: 80px;">
+                        </div>
+                        <div>
+                            <label class="form-label">Workers</label>
+                            <select x-model.number="config.workers" class="form-select" style="width: 80px;">
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                            </select>
+                        </div>
+                        <!-- Fields -->
+                        <div>
+                            <label class="form-label">Fields</label>
+                            <div class="checkbox-group">
+                                <template x-for="f in allFields" :key="f">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" :value="f" x-model="config.fields">
+                                        <span x-text="f.replace('_', ' ')"></span>
+                                    </label>
+                                </template>
+                            </div>
+                        </div>
+                        <!-- Planners -->
+                        <div>
+                            <label class="form-label">Planners</label>
+                            <div class="checkbox-group">
+                                <template x-for="p in allPlanners" :key="p">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" :value="p" x-model="config.planners">
+                                        <span x-text="shortPlanner(p)"></span>
+                                    </label>
+                                </template>
+                            </div>
                         </div>
                     </div>
-                </template>
-                <template x-if="!system.gpu"><div class="stat-value" style="color: var(--text-dim)">N/A</div></template>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">gpu mem</div>
-                <template x-if="system.gpu">
-                    <div>
-                        <div class="stat-value" x-text="Math.round(system.gpu.memory_used_mb/1024*10)/10 + '/' + Math.round(system.gpu.memory_total_mb/1024*10)/10 + ' GB'">0/0 GB</div>
-                        <div class="stat-bar">
-                            <div class="stat-fill" :style="'width: ' + (system.gpu.memory_used_mb / system.gpu.memory_total_mb * 100) + '%'"></div>
-                        </div>
+                    <!-- Action buttons -->
+                    <div style="display: flex; gap: 8px; margin-top: 16px;">
+                        <button @click="startOrchestrator()" :disabled="orchestrator_running" class="btn btn-green">
+                            <i class="fas fa-play"></i> START
+                        </button>
+                        <button @click="stopOrchestrator()" :disabled="!orchestrator_running" class="btn btn-red">
+                            <i class="fas fa-stop"></i> STOP
+                        </button>
+                        <button @click="retryOrchestrator()" :disabled="orchestrator_running" class="btn btn-yellow">
+                            <i class="fas fa-redo"></i> RETRY
+                        </button>
+                        <button @click="cleanData()" :disabled="orchestrator_running" class="btn">
+                            <i class="fas fa-trash"></i> CLEAN
+                        </button>
                     </div>
-                </template>
-                <template x-if="!system.gpu"><div class="stat-value" style="color: var(--text-dim)">N/A</div></template>
+                </div>
+            </div>
+
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="label">State</span>
+                    <span class="value" :class="orchestrator_running ? 'green' : (orchestrator.state === 'stopped' ? 'red' : 'blue')"
+                          x-text="orchestrator_running ? 'Running' : (orchestrator.state || 'Idle')"></span>
+                </div>
+                <div class="status-item">
+                    <span class="label">Completed</span>
+                    <span class="value green" x-text="(orchestrator.completed_jobs || 0) + '/' + (orchestrator.total_jobs || 0)"></span>
+                </div>
+                <div class="status-item">
+                    <span class="label">Failed</span>
+                    <span class="value" :class="(orchestrator.failed_jobs || 0) > 0 ? 'red' : ''" x-text="orchestrator.failed_jobs || 0"></span>
+                </div>
+                <div class="status-item">
+                    <span class="label">Remaining</span>
+                    <span class="value" x-text="orchestrator.jobs_remaining || 0"></span>
+                </div>
+                <div class="status-item">
+                    <span class="label">Elapsed</span>
+                    <span class="value mono" x-text="formatElapsed(orchestrator.elapsed_seconds || 0)"></span>
+                </div>
+            </div>
+
+            <!-- Worker Grid -->
+            <div class="card" style="margin-bottom: 16px;">
+                <div class="card-header"><span><i class="fas fa-cubes"></i> Workers</span></div>
+                <div class="card-body">
+                    <div class="grid-3">
+                        <template x-for="slot in [0,1,2,3,4,5]" :key="slot">
+                            <div class="worker-card" x-show="slot < (config.workers || 4)">
+                                <div class="worker-title">
+                                    <span>Worker <span x-text="slot"></span></span>
+                                    <span class="status-dot" :class="getWorkerJob(slot) ? 'online pulse' : 'offline'" style="width: 6px; height: 6px;"></span>
+                                </div>
+                                <div class="worker-job" x-text="getWorkerJob(slot) || 'Idle'"></div>
+                                <div class="progress">
+                                    <div class="progress-fill blue" :style="'width:' + getWorkerSamples(slot) + '%'"></div>
+                                </div>
+                                <div style="font-size: 10px; color: var(--text-dim); margin-top: 4px;" x-text="getWorkerSamplesRaw(slot) + '/100 samples'"></div>
+                                <!-- Progress image -->
+                                <template x-if="getWorkerJob(slot) && getWorkerProgressImage(slot)">
+                                    <img :src="getWorkerProgressImage(slot) + '?t=' + refreshTick"
+                                         class="progress-img" onerror="this.style.display='none'" onload="this.style.display='block'">
+                                </template>
+                                <div class="worker-actions">
+                                    <a :href="'http://' + location.hostname + ':' + (6090 + slot) + '/vnc.html'" target="_blank" class="btn btn-sm">
+                                        <i class="fas fa-desktop"></i> VNC
+                                    </a>
+                                    <button @click="killWorker(slot)" class="btn btn-sm btn-red"><i class="fas fa-times"></i> Kill</button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom: Job Queue + Logs -->
+            <div class="grid-2">
+                <!-- Job Queue -->
+                <div class="card">
+                    <div class="card-header">
+                        <span><i class="fas fa-list"></i> Job Queue</span>
+                        <span style="font-size: 11px; color: var(--text-dim);" x-text="Object.keys(orchestrator.job_list || {}).length + ' jobs'"></span>
+                    </div>
+                    <div class="table-wrap" style="max-height: 350px;">
+                        <table>
+                            <thead><tr><th>Planner</th><th>Field</th><th>Trial</th><th>Status</th></tr></thead>
+                            <tbody>
+                                <template x-for="job in sortedJobs" :key="job.key">
+                                    <tr>
+                                        <td x-text="job.planner" class="mono" style="font-size: 10px;"></td>
+                                        <td x-text="job.field" style="font-size: 10px;"></td>
+                                        <td x-text="job.trial" class="mono" style="font-size: 10px;"></td>
+                                        <td>
+                                            <span class="badge" :class="{
+                                                'badge-running': job.status === 'running',
+                                                'badge-completed': job.status === 'completed',
+                                                'badge-failed': job.status === 'failed',
+                                                'badge-pending': job.status === 'pending'
+                                            }" x-text="job.status"></span>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                        <template x-if="sortedJobs.length === 0">
+                            <div style="padding: 30px; text-align: center; color: var(--text-dim); font-size: 12px;">No jobs</div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Logs -->
+                <div class="card">
+                    <div class="card-header"><span><i class="fas fa-terminal"></i> Orchestrator Logs</span></div>
+                    <div class="log-panel" x-ref="logPanel">
+                        <template x-for="(line, i) in orchLogs" :key="i">
+                            <div x-text="line"></div>
+                        </template>
+                        <template x-if="orchLogs.length === 0">
+                            <div style="color: var(--text-muted);">No log output</div>
+                        </template>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Tab: Simulations -->
-        <div x-show="currentTab === 'simulations'" x-cloak>
-            <div class="grid-3">
-                <!-- Controls -->
-                <div>
-                    <div class="panel">
-                        <div class="panel-header">
-                            <span class="panel-title"><i class="fas fa-rocket"></i> launch batch</span>
-                        </div>
-                        <div class="panel-body">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-                                <div class="form-group" style="margin-bottom: 0;">
-                                    <label class="form-label">start</label>
-                                    <input type="number" x-model="batchStart" min="1" class="form-input">
-                                </div>
-                                <div class="form-group" style="margin-bottom: 0;">
-                                    <label class="form-label">end</label>
-                                    <input type="number" x-model="batchEnd" min="1" class="form-input">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">concurrent: <strong style="color: var(--accent)" x-text="concurrent"></strong></label>
-                                <input type="range" x-model="concurrent" min="1" max="5" class="form-range">
-                            </div>
-                            <button @click="startBatch()" :disabled="loading" class="btn btn-primary btn-block">
-                                <i class="fas fa-play"></i>
-                                <span x-text="loading ? 'starting...' : 'launch'"></span>
-                            </button>
-                        </div>
-                    </div>
+        <!-- ================================================================ -->
+        <!-- TAB 2: RESULTS VIEWER -->
+        <!-- ================================================================ -->
+        <div x-show="tab === 'results'" x-cloak x-init="$watch('tab', v => v === 'results' && loadResults())">
 
-                    <div class="panel" style="margin-top: 12px;">
-                        <div class="panel-header">
-                            <span class="panel-title"><i class="fas fa-tools"></i> actions</span>
-                        </div>
-                        <div class="panel-body" style="display: flex; flex-direction: column; gap: 8px;">
-                            <button @click="startSingleTrial()" class="btn btn-block">
-                                <i class="fas fa-plus"></i> single trial
-                            </button>
-                            <button @click="stopAll()" class="btn btn-danger btn-block">
-                                <i class="fas fa-stop"></i> stop all
-                            </button>
-                            <button @click="refreshStatus()" class="btn btn-block">
-                                <i class="fas fa-sync-alt"></i> refresh
-                            </button>
-                        </div>
+            <!-- Section A: Statistics Overview -->
+            <div class="card" style="margin-bottom: 16px;">
+                <div class="card-header">
+                    <span><i class="fas fa-chart-line"></i> Statistical Comparisons</span>
+                    <div style="display: flex; gap: 8px;">
+                        <button @click="runStatistics()" :disabled="scriptRunning" class="btn btn-accent btn-sm">
+                            <i class="fas fa-play" x-show="!scriptRunning"></i>
+                            <i class="fas fa-spinner fa-spin" x-show="scriptRunning"></i>
+                            <span x-text="scriptRunning ? 'Running...' : 'Run Comparisons'"></span>
+                        </button>
                     </div>
                 </div>
-
-                <!-- Active Trials -->
-                <div class="panel">
-                    <div class="panel-header">
-                        <span class="panel-title"><i class="fas fa-server"></i> active trials</span>
-                        <span class="badge" x-text="containers.filter(c => c.status === 'running').length + ' running'"></span>
-                    </div>
-                    <div class="panel-body" style="max-height: 450px; overflow-y: auto;">
-                        <template x-if="containers.length > 0">
-                            <div>
-                                <template x-for="container in containers" :key="container.name">
-                                    <div class="trial-item">
-                                        <div class="trial-info">
-                                            <div class="trial-icon" :class="container.status === 'running' ? 'running' : ''">
-                                                <i class="fas fa-cube"></i>
-                                            </div>
-                                            <div>
-                                                <div class="trial-name" x-text="'trial_' + container.trial_id"></div>
-                                                <div class="trial-status" :class="container.status" x-text="container.status"></div>
-                                            </div>
-                                        </div>
-                                        <div class="trial-actions">
-                                            <template x-if="container.status === 'running' && container.vnc_port">
-                                                <a :href="getTrialVncUrl(container.trial_id, container.vnc_port)" target="_blank" class="btn btn-sm">vnc</a>
-                                            </template>
-                                            <template x-if="container.status === 'running'">
-                                                <button @click="stopTrial(container.trial_id)" class="btn btn-sm btn-danger"><i class="fas fa-stop"></i></button>
-                                            </template>
-                                            <template x-if="container.status !== 'running'">
-                                                <button @click="removeTrial(container.trial_id)" class="btn btn-sm"><i class="fas fa-trash"></i></button>
-                                            </template>
-                                        </div>
-                                    </div>
+                <div class="card-body">
+                    <!-- Script output (collapsible) -->
+                    <template x-if="scriptOutput.length > 0">
+                        <details style="margin-bottom: 16px;">
+                            <summary style="cursor: pointer; font-size: 12px; color: var(--text-dim);">Script Output (<span x-text="scriptOutput.length"></span> lines)</summary>
+                            <div class="log-panel" style="max-height: 200px; margin-top: 8px;">
+                                <template x-for="(line, i) in scriptOutput" :key="i">
+                                    <div x-text="line"></div>
                                 </template>
                             </div>
-                        </template>
-                        <template x-if="containers.length === 0">
-                            <div class="empty-state">
-                                <i class="fas fa-inbox"></i>
-                                <p>no active containers</p>
-                            </div>
-                        </template>
-                    </div>
-                </div>
+                        </details>
+                    </template>
 
-                <!-- Completed Trials -->
-                <div class="panel">
-                    <div class="panel-header">
-                        <span class="panel-title"><i class="fas fa-check-circle"></i> completed</span>
-                    </div>
-                    <div class="panel-body" style="max-height: 450px; overflow-y: auto;">
-                        <template x-if="completedTrials.length > 0">
-                            <div>
-                                <template x-for="trial in completedTrials" :key="trial.id">
-                                    <div class="trial-item">
-                                        <div class="trial-info">
-                                            <div class="trial-icon running">
-                                                <i class="fas fa-check"></i>
-                                            </div>
-                                            <div>
-                                                <div class="trial-name" x-text="'trial_' + trial.id"></div>
-                                                <div class="trial-status" x-text="trial.field_count + ' fields'"></div>
-                                            </div>
-                                        </div>
-                                        <div class="trial-actions">
-                                            <a :href="'/api/download/' + trial.id" class="btn btn-sm"><i class="fas fa-download"></i></a>
-                                            <button @click="runReconstruction(trial.id)" class="btn btn-sm btn-primary">recon</button>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-                        <template x-if="completedTrials.length === 0">
-                            <div class="empty-state">
-                                <i class="fas fa-folder-open"></i>
-                                <p>no completed trials</p>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab: Reconstruction -->
-        <div x-show="currentTab === 'reconstruction'" x-cloak x-init="$watch('currentTab', val => val === 'reconstruction' && loadExistingResults())">
-            <div class="grid-3">
-                <!-- Controls -->
-                <div>
-                    <div class="panel">
-                        <div class="panel-header">
-                            <span class="panel-title"><i class="fas fa-play-circle"></i> run</span>
-                        </div>
-                        <div class="panel-body">
-                            <div class="form-group">
-                                <label class="form-label">select trial</label>
-                                <select x-model="reconTrial" @change="loadExistingResults()" class="form-select">
-                                    <template x-for="trial in completedTrials" :key="trial.id">
-                                        <option :value="trial.id" x-text="'trial_' + trial.id"></option>
-                                    </template>
-                                </select>
-                            </div>
-                            <button @click="startReconstruction()" :disabled="reconRunning" class="btn btn-primary btn-block">
-                                <i class="fas fa-play" x-show="!reconRunning"></i>
-                                <i class="fas fa-spinner fa-spin" x-show="reconRunning"></i>
-                                <span x-text="reconRunning ? 'running...' : 'start'"></span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="panel" style="margin-top: 12px;">
-                        <div class="panel-header">
-                            <span class="panel-title"><i class="fas fa-th"></i> heatmap</span>
-                        </div>
-                        <div class="panel-body" style="display: flex; flex-direction: column; gap: 8px;">
-                            <button @click="generateComparisonHeatmap()" :disabled="reconResults.length === 0" class="btn btn-block">
-                                <i class="fas fa-magic"></i> generate
-                            </button>
-                            <button @click="showComparisonHeatmap()" :disabled="!hasComparisonHeatmap" class="btn btn-primary btn-block">
-                                <i class="fas fa-eye"></i> view
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="panel" style="margin-top: 12px;">
-                        <div class="panel-body">
-                            <button @click="deleteTrialData()" class="btn btn-danger btn-block">
-                                <i class="fas fa-trash"></i> delete trial data
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Results -->
-                <div class="panel" style="grid-column: span 2;">
-                    <div class="panel-header">
-                        <span class="panel-title"><i class="fas fa-table"></i> results</span>
-                        <span class="badge" x-text="filteredResults.length + '/' + reconResults.length"></span>
-                    </div>
-
-                    <!-- Inline Filters -->
-                    <div class="filters-inline">
-                        <div class="filter-group">
-                            <label>field</label>
-                            <select x-model="filterField">
-                                <option value="all">all</option>
-                                <option value="radial">radial</option>
-                                <option value="x_compress">x_compress</option>
-                                <option value="y_compress">y_compress</option>
-                                <option value="x_compress_tilt">x_compress_tilt</option>
-                                <option value="y_compress_tilt">y_compress_tilt</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>method</label>
-                            <select x-model="filterMethod">
-                                <option value="all">all</option>
-                                <option value="standard_gp">standard_gp</option>
-                                <option value="mchutchon_nigp">mchutchon_nigp</option>
-                                <option value="girard">girard</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>kernel</label>
-                            <select x-model="filterKernel">
-                                <option value="all">all</option>
-                                <option value="rbf">rbf</option>
-                                <option value="matern15">matern15</option>
-                                <option value="matern25">matern25</option>
-                                <option value="exponential">exponential</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="panel-body">
-                        <template x-if="filteredResults.length > 0">
-                            <div>
-                                <div class="summary-row">
-                                    <div class="summary-box">
-                                        <div class="summary-label">best rmse</div>
-                                        <div class="summary-value" x-text="Math.min(...filteredResults.map(r => r.rmse)).toFixed(4)"></div>
-                                    </div>
-                                    <div class="summary-box">
-                                        <div class="summary-label">best nrmse</div>
-                                        <div class="summary-value" x-text="Math.min(...filteredResults.map(r => r.nrmse)).toFixed(4)"></div>
-                                    </div>
-                                    <div class="summary-box">
-                                        <div class="summary-label">methods</div>
-                                        <div class="summary-value" x-text="[...new Set(filteredResults.map(r => r.method))].length"></div>
-                                    </div>
+                    <!-- Statistics image gallery -->
+                    <template x-if="statisticsImages.length > 0">
+                        <div class="image-grid">
+                            <template x-for="img in statisticsImages" :key="img.name">
+                                <div class="image-card" @click="lightbox = {show: true, src: '/api/results/image/statistics/' + img.name}">
+                                    <img :src="'/api/results/image/statistics/' + img.name" :alt="img.name" loading="lazy">
+                                    <div class="image-label" x-text="img.name.replace('.png', '').replace(/_/g, ' ')"></div>
                                 </div>
-
-                                <div class="table-wrap">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>field</th>
-                                                <th>method</th>
-                                                <th>kernel</th>
-                                                <th>rmse</th>
-                                                <th>nrmse</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <template x-for="result in filteredResults" :key="result.field + result.method + result.kernel">
-                                                <tr>
-                                                    <td x-text="result.field"></td>
-                                                    <td>
-                                                        <span class="badge-method"
-                                                            :class="{
-                                                                'badge-blue': result.method === 'standard_gp',
-                                                                'badge-purple': result.method === 'mchutchon_nigp',
-                                                                'badge-yellow': result.method === 'girard'
-                                                            }"
-                                                            x-text="result.method"></span>
-                                                    </td>
-                                                    <td x-text="result.kernel"></td>
-                                                    <td :class="result.rmse === Math.min(...filteredResults.filter(r => r.field === result.field).map(r => r.rmse)) ? 'text-best' : ''"
-                                                        x-text="result.rmse.toFixed(4)"></td>
-                                                    <td :class="result.nrmse === Math.min(...filteredResults.filter(r => r.field === result.field).map(r => r.nrmse)) ? 'text-best' : ''"
-                                                        x-text="result.nrmse.toFixed(4)"></td>
-                                                </tr>
-                                            </template>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </template>
-
-                        <template x-if="reconResults.length === 0 && !reconRunning">
-                            <div class="empty-state">
-                                <i class="fas fa-chart-area"></i>
-                                <p>run reconstruction to see results</p>
-                            </div>
-                        </template>
-
-                        <template x-if="reconRunning">
-                            <div class="empty-state">
-                                <i class="fas fa-spinner fa-spin"></i>
-                                <p>running gp reconstruction...</p>
-                            </div>
-                        </template>
-                    </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template x-if="statisticsImages.length === 0 && !scriptRunning">
+                        <div style="text-align: center; padding: 30px; color: var(--text-dim); font-size: 12px;">
+                            No statistics plots found. Click "Run Comparisons" to generate.
+                        </div>
+                    </template>
                 </div>
             </div>
 
-            <!-- Images -->
-            <div class="panel" style="margin-top: 16px;" x-show="filteredImages.length > 0">
-                <div class="panel-header">
-                    <span class="panel-title"><i class="fas fa-images"></i> images</span>
-                    <span class="badge" x-text="filteredImages.length + ' images'"></span>
+            <!-- CSV Data Tables -->
+            <template x-if="csvData.grouped.rows.length > 0">
+                <div class="card" style="margin-bottom: 16px;">
+                    <div class="card-header"><span><i class="fas fa-table"></i> Grouped Comparisons</span></div>
+                    <div class="table-wrap" style="max-height: 400px;">
+                        <table>
+                            <thead><tr>
+                                <template x-for="h in csvData.grouped.headers" :key="h">
+                                    <th x-text="h.replace(/_/g, ' ')"></th>
+                                </template>
+                            </tr></thead>
+                            <tbody>
+                                <template x-for="(row, i) in csvData.grouped.rows" :key="i">
+                                    <tr>
+                                        <template x-for="h in csvData.grouped.headers" :key="h">
+                                            <td :class="getCsvCellClass(h, row[h])" x-text="formatCsvCell(h, row[h])" class="mono" style="font-size: 10px;"></td>
+                                        </template>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="image-grid">
-                    <template x-for="img in filteredImages" :key="img.path">
-                        <div class="image-card" @click="openImageModal(img.url)">
-                            <img :src="img.url" :alt="img.name">
+            </template>
+
+            <template x-if="csvData.tests.rows.length > 0">
+                <div class="card" style="margin-bottom: 16px;">
+                    <div class="card-header"><span><i class="fas fa-table"></i> Statistical Tests</span></div>
+                    <div class="table-wrap" style="max-height: 400px;">
+                        <table>
+                            <thead><tr>
+                                <template x-for="h in csvData.tests.headers" :key="h">
+                                    <th x-text="h.replace(/_/g, ' ')"></th>
+                                </template>
+                            </tr></thead>
+                            <tbody>
+                                <template x-for="(row, i) in csvData.tests.rows" :key="i">
+                                    <tr>
+                                        <template x-for="h in csvData.tests.headers" :key="h">
+                                            <td :class="getCsvCellClass(h, row[h])" x-text="formatCsvCell(h, row[h])" class="mono" style="font-size: 10px;"></td>
+                                        </template>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Section B: Per-Trial Browser -->
+            <div class="card">
+                <div class="card-header">
+                    <span><i class="fas fa-folder-open"></i> Per-Trial Browser</span>
+                    <span style="font-size: 11px; color: var(--text-dim);" x-text="filteredTrials.length + ' trials'"></span>
+                </div>
+                <div class="card-body">
+                    <!-- Filter bar -->
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <label>Planner</label>
+                            <select x-model="results.filters.planner">
+                                <option value="all">All</option>
+                                <template x-for="p in allPlanners" :key="p">
+                                    <option :value="p" x-text="shortPlanner(p)"></option>
+                                </template>
+                                <option value="pose_aware">Pose-Aware</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Field</label>
+                            <select x-model="results.filters.field">
+                                <option value="all">All</option>
+                                <template x-for="f in allFields" :key="f">
+                                    <option :value="f" x-text="f"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Trial</label>
+                            <input type="text" x-model="results.filters.trial" placeholder="e.g. trial_001">
+                        </div>
+                    </div>
+
+                    <!-- Trial cards grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-top: 12px;">
+                        <template x-for="t in filteredTrials.slice(0, 60)" :key="t.planner + t.field + t.trial">
+                            <div class="trial-card" @click="openTrialModal(t)">
+                                <img :src="'/api/results/image/trials/' + t.planner + '/' + t.field + '/' + t.trial + '/figures/reconstruction_comparison.png'"
+                                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 300%22><rect fill=%22%23161922%22 width=%22400%22 height=%22300%22/><text x=%22200%22 y=%22150%22 fill=%22%2364748b%22 text-anchor=%22middle%22 font-size=%2214%22>No Image</text></svg>'"
+                                     loading="lazy">
+                                <div class="trial-card-body">
+                                    <div class="trial-card-title" x-text="shortPlanner(t.planner) + ' / ' + t.field + ' / ' + t.trial"></div>
+                                    <div class="trial-card-metrics">
+                                        <span class="metric-label">RMSE</span>
+                                        <span class="metric-value" x-text="t.rmse ? t.rmse.toFixed(3) : '-'"></span>
+                                        <span class="metric-label">MAE</span>
+                                        <span class="metric-value" x-text="t.mae ? t.mae.toFixed(3) : '-'"></span>
+                                        <span class="metric-label">Travel</span>
+                                        <span class="metric-value" x-text="t.travel_cost ? t.travel_cost.toFixed(1) : '-'"></span>
+                                        <span class="metric-label">Info</span>
+                                        <span class="metric-value" x-text="t.info_gain ? t.info_gain.toFixed(1) : '-'"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <template x-if="filteredTrials.length === 0 && !resultsLoading">
+                        <div style="text-align: center; padding: 40px; color: var(--text-dim);">No trials found</div>
+                    </template>
+                    <template x-if="filteredTrials.length > 60">
+                        <div style="text-align: center; padding: 16px; color: var(--text-dim); font-size: 12px;">
+                            Showing 60 of <span x-text="filteredTrials.length"></span> trials. Use filters to narrow down.
                         </div>
                     </template>
                 </div>
             </div>
         </div>
 
-        <!-- Tab: Host PC -->
-        <div x-show="currentTab === 'host'" x-cloak x-init="$watch('currentTab', val => val === 'host' && checkHostVncStatus())">
-            <div class="grid-2">
-                <div class="panel">
-                    <div class="panel-header">
-                        <span class="panel-title"><i class="fas fa-desktop"></i> remote desktop</span>
-                    </div>
-                    <div class="panel-body">
-                        <div class="vnc-status-grid">
-                            <div class="vnc-status-item">
-                                <span class="dot" :style="hostVncStatus.x11vnc ? 'background: var(--accent)' : 'background: var(--text-dim)'"></span>
-                                <span> x11vnc</span>
-                                <div style="font-size: 10px; color: var(--text-dim); margin-top: 4px;" x-text="hostVncStatus.x11vnc ? 'port 5900' : 'stopped'"></div>
-                            </div>
-                            <div class="vnc-status-item">
-                                <span class="dot" :style="hostVncStatus.novnc ? 'background: var(--accent)' : 'background: var(--text-dim)'"></span>
-                                <span> novnc</span>
-                                <div style="font-size: 10px; color: var(--text-dim); margin-top: 4px;" x-text="hostVncStatus.novnc ? 'port 6080' : 'stopped'"></div>
-                            </div>
-                        </div>
+        <!-- ================================================================ -->
+        <!-- TAB 3: SYSTEM -->
+        <!-- ================================================================ -->
+        <div x-show="tab === 'system'" x-cloak x-init="$watch('tab', v => v === 'system' && checkHostVnc())">
 
+            <!-- Resource Cards -->
+            <div class="grid-4" style="margin-bottom: 16px;">
+                <div class="stat-card">
+                    <div class="stat-label">CPU</div>
+                    <div class="stat-value" x-text="system.cpu_percent + '%'"></div>
+                    <div class="progress"><div class="progress-fill green" :style="'width:' + system.cpu_percent + '%'"></div></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Memory</div>
+                    <div class="stat-value" x-text="system.memory_percent + '%'"></div>
+                    <div class="progress"><div class="progress-fill blue" :style="'width:' + system.memory_percent + '%'"></div></div>
+                    <div style="font-size: 10px; color: var(--text-dim); margin-top: 4px;" x-text="system.memory_used_gb + '/' + system.memory_total_gb + ' GB'"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">GPU</div>
+                    <template x-if="system.gpu">
+                        <div>
+                            <div class="stat-value" x-text="system.gpu.utilization + '%'"></div>
+                            <div class="progress"><div class="progress-fill yellow" :style="'width:' + system.gpu.utilization + '%'"></div></div>
+                        </div>
+                    </template>
+                    <template x-if="!system.gpu"><div class="stat-value" style="color: var(--text-dim);">N/A</div></template>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">GPU Memory</div>
+                    <template x-if="system.gpu">
+                        <div>
+                            <div class="stat-value" x-text="Math.round(system.gpu.memory_used_mb/1024*10)/10 + '/' + Math.round(system.gpu.memory_total_mb/1024*10)/10 + ' GB'"></div>
+                            <div class="progress"><div class="progress-fill yellow" :style="'width:' + (system.gpu.memory_used_mb / system.gpu.memory_total_mb * 100) + '%'"></div></div>
+                        </div>
+                    </template>
+                    <template x-if="!system.gpu"><div class="stat-value" style="color: var(--text-dim);">N/A</div></template>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <!-- Host Remote Desktop -->
+                <div class="card">
+                    <div class="card-header"><span><i class="fas fa-desktop"></i> Host Remote Desktop</span></div>
+                    <div class="card-body">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                            <span class="status-dot" :class="hostVnc.running ? 'online' : 'offline'"></span>
+                            <span style="font-size: 12px;" x-text="hostVnc.running ? 'Running (port 6080)' : 'Stopped'"></span>
+                        </div>
                         <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                            <template x-if="!hostVncRunning">
-                                <button @click="startHostVNC()" class="btn btn-primary" style="flex: 1;">
-                                    <i class="fas fa-play"></i> start
-                                </button>
-                            </template>
-                            <template x-if="hostVncRunning">
-                                <button @click="stopHostVNC()" class="btn btn-danger" style="flex: 1;">
-                                    <i class="fas fa-stop"></i> stop
-                                </button>
-                            </template>
-                            <button @click="checkHostVncStatus()" class="btn">
-                                <i class="fas fa-sync-alt"></i>
+                            <button @click="startHostVnc()" :disabled="hostVnc.running" class="btn btn-green" style="flex: 1;">
+                                <i class="fas fa-play"></i> Start
+                            </button>
+                            <button @click="stopHostVnc()" :disabled="!hostVnc.running" class="btn btn-red" style="flex: 1;">
+                                <i class="fas fa-stop"></i> Stop
                             </button>
                         </div>
-
-                        <template x-if="hostVncRunning">
-                            <a :href="getHostVncUrl()" target="_blank" class="btn btn-primary btn-block">
-                                <i class="fas fa-external-link-alt"></i> open desktop
+                        <template x-if="hostVnc.running">
+                            <a :href="'http://' + location.hostname + ':6080/vnc.html'" target="_blank" class="btn btn-accent btn-block">
+                                <i class="fas fa-external-link-alt"></i> Open Desktop
                             </a>
                         </template>
                     </div>
                 </div>
 
-                <div class="panel">
-                    <div class="panel-header">
-                        <span class="panel-title"><i class="fas fa-server"></i> system info</span>
-                    </div>
-                    <div class="panel-body">
-                        <div class="info-row">
-                            <span class="info-label">status</span>
-                            <span style="color: var(--accent);"><span class="dot pulse" style="display: inline-block; margin-right: 6px;"></span>online</span>
+                <!-- System Info + Worker VNC -->
+                <div class="card">
+                    <div class="card-header"><span><i class="fas fa-info-circle"></i> System Info</span></div>
+                    <div class="card-body">
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--border);">
+                                <span style="color: var(--text-dim);">GPU</span>
+                                <span x-text="system.gpu ? system.gpu.name : 'N/A'"></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--border);">
+                                <span style="color: var(--text-dim);">System RAM</span>
+                                <span x-text="system.memory_total_gb + ' GB'"></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--border);">
+                                <span style="color: var(--text-dim);">Orchestrator</span>
+                                <span :style="orchestrator_running ? 'color: var(--green)' : ''" x-text="orchestrator_running ? 'Running' : 'Idle'"></span>
+                            </div>
                         </div>
-                        <div class="info-row">
-                            <span class="info-label">gpu</span>
-                            <span x-text="system.gpu ? system.gpu.name : 'N/A'"></span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">gpu memory</span>
-                            <span x-text="system.gpu ? Math.round(system.gpu.memory_total_mb/1024) + ' GB' : 'N/A'"></span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">system ram</span>
-                            <span x-text="system.memory_total_gb + ' GB'"></span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">cpu usage</span>
-                            <span style="color: var(--accent);" x-text="system.cpu_percent + '%'"></span>
-                        </div>
+
+                        <div style="font-size: 11px; font-weight: 600; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase;">Worker VNC Links</div>
+                        <template x-for="slot in [0,1,2,3,4,5]" :key="slot">
+                            <div class="vnc-card">
+                                <div>
+                                    <div class="vnc-label">Worker <span x-text="slot"></span></div>
+                                    <div class="vnc-port">localhost:<span x-text="6090 + slot"></span></div>
+                                </div>
+                                <a :href="'http://' + location.hostname + ':' + (6090 + slot) + '/vnc.html'" target="_blank" class="btn btn-sm">
+                                    <i class="fas fa-external-link-alt"></i> Open
+                                </a>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Image Modal -->
-    <div x-show="imageModalOpen" x-cloak class="modal-overlay" @click="imageModalOpen = false">
-        <img :src="imageModalUrl">
-        <button class="modal-close" @click="imageModalOpen = false"><i class="fas fa-times"></i></button>
+    <!-- Lightbox -->
+    <div x-show="lightbox.show" x-cloak class="lightbox" @click.self="lightbox.show = false">
+        <img :src="lightbox.src">
+        <button class="lightbox-close" @click="lightbox.show = false"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- Trial Detail Modal -->
+    <div x-show="trialModal.show" x-cloak class="modal-overlay" @click.self="trialModal.show = false">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span style="font-weight: 600;" x-text="trialModal.title"></span>
+                <button class="modal-close" @click="trialModal.show = false"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <!-- Figures -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                    <template x-for="fig in ['final.png', 'progress.png', 'reconstruction_comparison.png']" :key="fig">
+                        <div class="image-card" @click="lightbox = {show: true, src: trialModal.imagePath + fig}">
+                            <img :src="trialModal.imagePath + fig" :alt="fig"
+                                 onerror="this.parentElement.style.display='none'" loading="lazy">
+                            <div class="image-label" x-text="fig.replace('.png', '').replace(/_/g, ' ')"></div>
+                        </div>
+                    </template>
+                </div>
+                <!-- Metrics table -->
+                <template x-if="trialModal.summary && Object.keys(trialModal.summary).length > 0">
+                    <div>
+                        <h4 style="font-size: 13px; margin-bottom: 8px;">Metrics</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                            <template x-for="key in Object.keys(trialModal.summary)" :key="key">
+                                <div style="display: flex; justify-content: space-between; padding: 4px 8px; background: var(--elevated); border-radius: 4px; font-size: 11px;">
+                                    <span style="color: var(--text-dim);" x-text="key.replace(/_/g, ' ')"></span>
+                                    <span class="mono" x-text="typeof trialModal.summary[key] === 'number' ? trialModal.summary[key].toFixed(4) : trialModal.summary[key]"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
     </div>
 
     <!-- Toasts -->
-    <div class="toast-container" x-show="notifications.length > 0">
-        <template x-for="(notif, index) in notifications" :key="index">
+    <div class="toast-container">
+        <template x-for="(notif, i) in notifications" :key="i">
             <div class="toast" :class="notif.type">
                 <i :class="notif.type === 'success' ? 'fas fa-check-circle' : notif.type === 'error' ? 'fas fa-times-circle' : 'fas fa-info-circle'"></i>
                 <span x-text="notif.message"></span>
@@ -1134,397 +756,366 @@
     </div>
 
     <script>
-        function dashboard() {
-            return {
-                connected: false,
-                loading: false,
-                currentTab: 'simulations',
-                batchStart: 1,
-                batchEnd: 10,
-                concurrent: 3,
-                containers: [],
-                completedTrials: [],
-                system: { cpu_percent: 0, memory_percent: 0, memory_used_gb: 0, memory_total_gb: 0, gpu: null },
-                notifications: [],
-                ws: null,
-                reconTrial: '1',
-                reconRunning: false,
-                reconResults: [],
-                reconImages: [],
-                reconError: null,
-                filterField: 'all',
-                filterMethod: 'all',
-                filterKernel: 'all',
-                imageModalOpen: false,
-                imageModalUrl: '',
-                hostVncRunning: false,
-                hostVncStatus: { x11vnc: false, novnc: false },
+    function dashboard() {
+        return {
+            tab: 'manager',
+            connected: false,
+            ws: null,
+            notifications: [],
+            refreshTick: Date.now(),
 
-                // Auth helper - get authorization header
-                getAuthHeader() {
-                    const auth = sessionStorage.getItem('auth');
-                    return auth ? { 'Authorization': 'Basic ' + auth } : {};
-                },
-
-                // Authenticated fetch wrapper
-                async authFetch(url, options = {}) {
-                    const headers = { ...options.headers, ...this.getAuthHeader() };
-                    const response = await fetch(url, { ...options, headers });
-                    if (response.status === 401) {
-                        // Not authenticated, redirect to login
-                        sessionStorage.removeItem('auth');
-                        sessionStorage.removeItem('username');
-                        window.location.href = '/login';
-                        throw new Error('Unauthorized');
-                    }
-                    return response;
-                },
-
-                get filteredResults() {
-                    return this.reconResults.filter(r => {
-                        if (this.filterField !== 'all' && r.field !== this.filterField) return false;
-                        if (this.filterMethod !== 'all' && r.method !== this.filterMethod) return false;
-                        if (this.filterKernel !== 'all' && r.kernel !== this.filterKernel) return false;
-                        return true;
-                    });
-                },
-
-                get hasComparisonHeatmap() {
-                    return this.reconImages.some(i => i.name.includes('comparison') || i.name.includes('heatmap') || i.path.includes('comparison'));
-                },
-
-                get filteredImages() {
-                    return this.reconImages.filter(img => {
-                        if (img.name.includes('comparison') || img.name.includes('heatmap') || img.path.includes('comparison')) return false;
-                        const parts = img.path.split('/');
-                        if (parts.length < 4) return false;
-                        const method = parts[0], field = parts[1], kernel = parts[2];
-                        if (this.filterField !== 'all' && field !== this.filterField) return false;
-                        if (this.filterMethod !== 'all' && method !== this.filterMethod) return false;
-                        if (this.filterKernel !== 'all' && kernel !== this.filterKernel) return false;
-                        return true;
-                    });
-                },
-
-                init() {
-                    // Check if authenticated
-                    if (!sessionStorage.getItem('auth')) {
-                        window.location.href = '/login';
-                        return;
-                    }
-                    this.connectWebSocket();
-                    this.refreshStatus();
-                    this.loadCompletedTrials().then(() => {
-                        if (this.reconTrial) this.loadExistingResults();
-                    });
-                    this.checkHostVncStatus();
-                },
-
-                connectWebSocket() {
-                    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-                    this.ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
-                    this.ws.onopen = () => { this.connected = true; };
-                    this.ws.onclose = () => { this.connected = false; setTimeout(() => this.connectWebSocket(), 3000); };
-                    this.ws.onmessage = (event) => {
-                        const data = JSON.parse(event.data);
-                        if (data.containers) this.containers = data.containers;
-                        if (data.system) this.system = data.system;
-                    };
-                },
-
-                async refreshStatus() {
-                    try {
-                        const response = await this.authFetch('/api/status');
-                        const data = await response.json();
-                        this.containers = data.containers;
-                        this.system = data.system;
-                        this.connected = true;
-                    } catch (e) {
-                        console.error(e);
-                        this.connected = false;
-                    }
-                },
-
-                async loadCompletedTrials() {
-                    try {
-                        const response = await this.authFetch('/api/trials/completed');
-                        this.completedTrials = await response.json();
-                        if (this.completedTrials.length > 0) this.reconTrial = this.completedTrials[0].id;
-                        return this.completedTrials;
-                    } catch (e) { return []; }
-                },
-
-                async startBatch() {
-                    this.loading = true;
-                    try {
-                        const response = await this.authFetch('/api/batch/start', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ start_trial: parseInt(this.batchStart), end_trial: parseInt(this.batchEnd), concurrent: parseInt(this.concurrent) })
-                        });
-                        const data = await response.json();
-                        this.notify('success', `started ${data.started.length} trials`);
-                        this.refreshStatus();
-                    } catch (e) { this.notify('error', 'failed to start batch'); }
-                    this.loading = false;
-                },
-
-                async startSingleTrial() {
-                    const trialId = prompt('enter trial number:');
-                    if (trialId) {
-                        try {
-                            await this.authFetch(`/api/trial/start/${trialId}`, { method: 'POST' });
-                            this.notify('success', `trial ${trialId} started`);
-                            this.refreshStatus();
-                        } catch (e) { this.notify('error', 'failed to start trial'); }
-                    }
-                },
-
-                async stopTrial(trialId) {
-                    try {
-                        await this.authFetch(`/api/trial/stop/${trialId}`, { method: 'POST' });
-                        this.notify('success', `trial ${trialId} stopped`);
-                        this.refreshStatus();
-                    } catch (e) { this.notify('error', 'failed to stop trial'); }
-                },
-
-                async removeTrial(trialId) {
-                    try {
-                        await this.authFetch(`/api/trial/${trialId}`, { method: 'DELETE' });
-                        this.notify('success', `trial ${trialId} removed`);
-                        this.refreshStatus();
-                    } catch (e) { this.notify('error', 'failed to remove trial'); }
-                },
-
-                getTrialVncUrl(trialId, vncPort) {
-                    const hostname = window.location.hostname;
-                    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.')) {
-                        return `http://${hostname}:${vncPort}/vnc.html`;
-                    }
-                    return `https://trial${trialId}.${hostname}/vnc.html`;
-                },
-
-                getHostVncUrl() {
-                    const hostname = window.location.hostname;
-                    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.')) {
-                        return `http://${hostname}:6080/vnc.html`;
-                    }
-                    return `https://vnc.${hostname}/vnc.html`;
-                },
-
-                async stopAll() {
-                    if (confirm('stop all running trials?')) {
-                        try {
-                            await this.authFetch('/api/batch/stop', { method: 'POST' });
-                            this.notify('success', 'all trials stopped');
-                            this.refreshStatus();
-                        } catch (e) { this.notify('error', 'failed to stop trials'); }
-                    }
-                },
-
-                runReconstruction(trialId) {
-                    this.reconTrial = trialId;
-                    this.currentTab = 'reconstruction';
-                },
-
-                async startReconstruction() {
-                    this.reconRunning = true;
-                    this.reconResults = [];
-                    this.reconError = null;
-                    try {
-                        const response = await this.authFetch(`/api/reconstruct/${this.reconTrial}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ field: 'all', method: 'all' })
-                        });
-                        const data = await response.json();
-                        if (data.success) {
-                            this.notify('info', `reconstruction started for trial ${this.reconTrial}`);
-                            this.pollReconstructionStatus();
-                        } else {
-                            this.notify('error', data.message || 'failed');
-                            this.reconRunning = false;
-                        }
-                    } catch (e) {
-                        this.notify('error', 'reconstruction failed');
-                        this.reconRunning = false;
-                    }
-                },
-
-                async pollReconstructionStatus() {
-                    const poll = async () => {
-                        try {
-                            const response = await this.authFetch(`/api/reconstruct/${this.reconTrial}/status`);
-                            const data = await response.json();
-                            if (data.running) {
-                                setTimeout(poll, 2000);
-                            } else {
-                                if (data.success === false || data.return_code !== 0) {
-                                    this.reconError = data.error || 'failed';
-                                    this.notify('error', 'reconstruction failed');
-                                    this.reconRunning = false;
-                                } else {
-                                    this.reconError = null;
-                                    setTimeout(() => this.loadReconstructionResults(), 1000);
-                                }
-                            }
-                        } catch (e) {
-                            this.reconRunning = false;
-                            this.reconError = 'status check failed';
-                        }
-                    };
-                    poll();
-                },
-
-                async loadReconstructionResults() {
-                    try {
-                        const response = await this.authFetch(`/api/reconstruct/${this.reconTrial}/results`);
-                        if (response.ok) {
-                            const data = await response.json();
-                            this.reconResults = data.results || [];
-                        } else {
-                            this.reconResults = [];
-                        }
-                        await this.loadReconstructionImages();
-                        if (this.reconResults.length > 0) {
-                            this.notify('success', `loaded ${this.reconResults.length} results`);
-                        }
-                    } catch (e) {
-                        this.notify('error', 'failed to load results');
-                        this.reconResults = [];
-                        this.reconImages = [];
-                    }
-                    this.reconRunning = false;
-                },
-
-                async loadReconstructionImages() {
-                    try {
-                        const response = await this.authFetch(`/api/reconstruct/${this.reconTrial}/images`);
-                        if (response.ok) {
-                            const data = await response.json();
-                            this.reconImages = data.images || [];
-                        } else {
-                            this.reconImages = [];
-                        }
-                    } catch (e) {
-                        this.reconImages = [];
-                    }
-                },
-
-                async loadExistingResults() {
-                    if (!this.reconTrial) return;
-                    this.reconError = null;
-                    try {
-                        const response = await this.authFetch(`/api/reconstruct/${this.reconTrial}/results`);
-                        if (response.ok) {
-                            const data = await response.json();
-                            this.reconResults = data.results || [];
-                        } else {
-                            this.reconResults = [];
-                        }
-                        await this.loadReconstructionImages();
-                    } catch (e) {
-                        this.reconResults = [];
-                        this.reconImages = [];
-                    }
-                },
-
-                async generateComparisonHeatmap() {
-                    if (this.reconResults.length === 0) return;
-                    this.reconRunning = true;
-                    try {
-                        const response = await this.authFetch(`/api/reconstruct/${this.reconTrial}/generate-heatmap`, { method: 'POST' });
-                        const data = await response.json();
-                        if (data.success) {
-                            this.notify('success', 'heatmap generated');
-                            await this.loadReconstructionImages();
-                        } else {
-                            this.notify('error', 'failed to generate heatmap');
-                        }
-                    } catch (e) {
-                        this.notify('error', 'failed to generate heatmap');
-                    }
-                    this.reconRunning = false;
-                },
-
-                showComparisonHeatmap() {
-                    const heatmap = this.reconImages.find(i => i.name.includes('comparison') || i.name.includes('heatmap'));
-                    if (heatmap) this.openImageModal(heatmap.url);
-                },
-
-                openImageModal(url) {
-                    this.imageModalUrl = url;
-                    this.imageModalOpen = true;
-                },
-
-                async deleteTrialData() {
-                    if (!confirm(`delete all data for trial ${this.reconTrial}?`)) return;
-                    try {
-                        const response = await this.authFetch(`/api/trial/${this.reconTrial}/data`, { method: 'DELETE' });
-                        const data = await response.json();
-                        if (data.success) {
-                            this.notify('success', 'trial deleted');
-                            this.reconResults = [];
-                            this.reconImages = [];
-                            this.reconError = null;
-                            await this.loadCompletedTrials();
-                            if (this.completedTrials.length > 0) {
-                                this.reconTrial = this.completedTrials[0].id;
-                                await this.loadExistingResults();
-                            }
-                        } else {
-                            this.notify('error', 'delete failed');
-                        }
-                    } catch (e) {
-                        this.notify('error', 'failed to delete');
-                    }
-                },
-
-                async startHostVNC() {
-                    try {
-                        const response = await this.authFetch('/api/host/vnc/start', { method: 'POST' });
-                        const data = await response.json();
-                        if (data.success) {
-                            this.hostVncRunning = true;
-                            this.notify('success', 'vnc started');
-                        } else {
-                            this.notify('error', 'failed to start vnc');
-                        }
-                    } catch (e) { this.notify('error', 'failed to start vnc'); }
-                },
-
-                async stopHostVNC() {
-                    try {
-                        await this.authFetch('/api/host/vnc/stop', { method: 'POST' });
-                        this.hostVncRunning = false;
-                        this.notify('success', 'vnc stopped');
-                    } catch (e) { this.notify('error', 'failed to stop vnc'); }
-                },
-
-                async checkHostVncStatus() {
-                    try {
-                        const response = await this.authFetch('/api/host/vnc/status');
-                        const data = await response.json();
-                        this.hostVncRunning = data.running;
-                        this.hostVncStatus = { x11vnc: data.x11vnc_running || false, novnc: data.novnc_running || false };
-                    } catch (e) {
-                        this.hostVncRunning = false;
-                        this.hostVncStatus = { x11vnc: false, novnc: false };
-                    }
-                },
-
-                notify(type, message) {
-                    this.notifications.push({ type, message });
-                    setTimeout(() => this.notifications.shift(), 3000);
-                },
-
-                logout() {
+            // Auth
+            getAuthHeader() {
+                const auth = sessionStorage.getItem('auth');
+                return auth ? { 'Authorization': 'Basic ' + auth } : {};
+            },
+            async authFetch(url, options = {}) {
+                const headers = { ...options.headers, ...this.getAuthHeader() };
+                const response = await fetch(url, { ...options, headers });
+                if (response.status === 401) {
                     sessionStorage.removeItem('auth');
                     sessionStorage.removeItem('username');
                     window.location.href = '/login';
+                    throw new Error('Unauthorized');
                 }
+                return response;
+            },
+
+            // Config
+            allFields: ['radial', 'x_compress', 'y_compress', 'x_compress_tilt', 'y_compress_tilt'],
+            allPlanners: ['exact', 'analytical', 'nonstationary_exact', 'nonstationary_pose_aware', 'nonstationary_exact_weighted', 'nonstationary_pose_aware_weighted'],
+            config: {
+                start_trial: 1, end_trial: 15, workers: 4,
+                fields: ['radial', 'x_compress', 'y_compress', 'x_compress_tilt', 'y_compress_tilt'],
+                planners: ['exact', 'analytical', 'nonstationary_exact', 'nonstationary_pose_aware', 'nonstationary_exact_weighted', 'nonstationary_pose_aware_weighted'],
+            },
+
+            // Orchestrator state (from WebSocket)
+            orchestrator: {},
+            orchestrator_running: false,
+            orchLogs: [],
+            scriptRunning: false,
+
+            // System
+            system: { cpu_percent: 0, memory_percent: 0, memory_used_gb: 0, memory_total_gb: 0, gpu: null },
+
+            // Results
+            results: { trials: [], filters: { planner: 'all', field: 'all', trial: '' } },
+            statisticsFiles: [],
+            resultsLoading: false,
+            csvData: { grouped: { headers: [], rows: [] }, tests: { headers: [], rows: [] } },
+
+            // Script runner
+            scriptOutput: [],
+
+            // Lightbox
+            lightbox: { show: false, src: '' },
+
+            // Trial modal
+            trialModal: { show: false, title: '', summary: {}, imagePath: '' },
+
+            // Host VNC
+            hostVnc: { running: false },
+
+            // Computed
+            get statisticsImages() {
+                return this.statisticsFiles.filter(f => f.ext === '.png');
+            },
+            get filteredTrials() {
+                return this.results.trials.filter(t => {
+                    if (this.results.filters.planner !== 'all' && t.planner !== this.results.filters.planner) return false;
+                    if (this.results.filters.field !== 'all' && t.field !== this.results.filters.field) return false;
+                    if (this.results.filters.trial && !t.trial.includes(this.results.filters.trial)) return false;
+                    return t.has_summary;
+                });
+            },
+            get sortedJobs() {
+                const jobs = [];
+                const jl = this.orchestrator.job_list || {};
+                for (const [key, val] of Object.entries(jl)) {
+                    const parts = key.split('/');
+                    jobs.push({ key, planner: parts[0] || '', field: parts[1] || '', trial: parts[2] || '', status: val.status || 'pending' });
+                }
+                const order = { running: 0, failed: 1, pending: 2, completed: 3 };
+                jobs.sort((a, b) => (order[a.status] ?? 4) - (order[b.status] ?? 4));
+                return jobs;
+            },
+
+            // Init
+            init() {
+                if (!sessionStorage.getItem('auth')) {
+                    window.location.href = '/login';
+                    return;
+                }
+                this.connectWebSocket();
+                this.pollLogs();
+                this.pollScriptStatus();
+                // Refresh progress images every 5s
+                setInterval(() => { this.refreshTick = Date.now(); }, 5000);
+            },
+
+            connectWebSocket() {
+                const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+                this.ws = new WebSocket(`${protocol}//${location.host}/ws`);
+                this.ws.onopen = () => { this.connected = true; };
+                this.ws.onclose = () => { this.connected = false; setTimeout(() => this.connectWebSocket(), 3000); };
+                this.ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    if (data.system) this.system = data.system;
+                    if (data.orchestrator) this.orchestrator = data.orchestrator;
+                    if (data.orchestrator_running !== undefined) this.orchestrator_running = data.orchestrator_running;
+                    if (data.script_running !== undefined) this.scriptRunning = data.script_running;
+                };
+            },
+
+            // Orchestrator actions
+            async startOrchestrator() {
+                try {
+                    const resp = await this.authFetch('/api/orchestrator/start', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.config)
+                    });
+                    const data = await resp.json();
+                    if (resp.ok) { this.notify('success', 'Orchestrator started'); }
+                    else { this.notify('error', data.detail || 'Failed to start'); }
+                } catch (e) { this.notify('error', 'Failed to start orchestrator'); }
+            },
+            async stopOrchestrator() {
+                if (!confirm('Stop orchestrator and all workers?')) return;
+                try {
+                    await this.authFetch('/api/orchestrator/stop', { method: 'POST' });
+                    this.notify('success', 'Orchestrator stopped');
+                } catch (e) { this.notify('error', 'Failed to stop'); }
+            },
+            async retryOrchestrator() {
+                try {
+                    const resp = await this.authFetch('/api/orchestrator/retry', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.config)
+                    });
+                    const data = await resp.json();
+                    if (resp.ok) { this.notify('success', 'Retry mode started'); }
+                    else { this.notify('error', data.detail || 'Failed'); }
+                } catch (e) { this.notify('error', 'Failed to start retry'); }
+            },
+            async cleanData() {
+                if (!confirm('Clean trial data for selected planners? This will delete data!')) return;
+                try {
+                    const resp = await this.authFetch('/api/orchestrator/clean', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            mode: 'range', start_trial: this.config.start_trial,
+                            end_trial: this.config.end_trial, planners: this.config.planners, backup: true
+                        })
+                    });
+                    const data = await resp.json();
+                    this.notify(data.success ? 'success' : 'error', `Deleted ${data.deleted.length} items`);
+                } catch (e) { this.notify('error', 'Clean failed'); }
+            },
+            async killWorker(slot) {
+                try {
+                    await this.authFetch(`/api/worker/${slot}/kill`, { method: 'POST' });
+                    this.notify('success', `Worker ${slot} killed`);
+                } catch (e) { this.notify('error', 'Failed to kill worker'); }
+            },
+
+            // Log polling
+            async pollLogs() {
+                const poll = async () => {
+                    if (this.tab === 'manager') {
+                        try {
+                            const resp = await this.authFetch('/api/orchestrator/logs?last_n=100');
+                            const data = await resp.json();
+                            this.orchLogs = data.logs || [];
+                            // Auto-scroll
+                            this.$nextTick(() => {
+                                const el = this.$refs.logPanel;
+                                if (el) el.scrollTop = el.scrollHeight;
+                            });
+                        } catch (e) {}
+                    }
+                    setTimeout(poll, 3000);
+                };
+                poll();
+            },
+
+            // Script status polling
+            async pollScriptStatus() {
+                const poll = async () => {
+                    if (this.scriptRunning || this.tab === 'results') {
+                        try {
+                            const resp = await this.authFetch('/api/results/statistics/status');
+                            const data = await resp.json();
+                            this.scriptRunning = data.running;
+                            this.scriptOutput = data.output || [];
+                            if (!data.running && this.scriptOutput.length > 0) {
+                                // Reload statistics files when done
+                                this.loadStatisticsFiles();
+                                this.loadCsvData();
+                            }
+                        } catch (e) {}
+                    }
+                    setTimeout(poll, 3000);
+                };
+                poll();
+            },
+
+            // Results loading
+            async loadResults() {
+                this.resultsLoading = true;
+                await Promise.all([
+                    this.loadTrials(),
+                    this.loadStatisticsFiles(),
+                    this.loadCsvData()
+                ]);
+                this.resultsLoading = false;
+            },
+            async loadTrials() {
+                try {
+                    const resp = await this.authFetch('/api/results/trials');
+                    this.results.trials = await resp.json();
+                } catch (e) { this.results.trials = []; }
+            },
+            async loadStatisticsFiles() {
+                try {
+                    const resp = await this.authFetch('/api/results/statistics');
+                    this.statisticsFiles = await resp.json();
+                } catch (e) { this.statisticsFiles = []; }
+            },
+            async loadCsvData() {
+                try {
+                    const [g, t] = await Promise.all([
+                        this.authFetch('/api/results/statistics/csv/grouped_comparisons.csv').then(r => r.ok ? r.json() : { headers: [], rows: [] }).catch(() => ({ headers: [], rows: [] })),
+                        this.authFetch('/api/results/statistics/csv/statistical_tests.csv').then(r => r.ok ? r.json() : { headers: [], rows: [] }).catch(() => ({ headers: [], rows: [] })),
+                    ]);
+                    this.csvData.grouped = g;
+                    this.csvData.tests = t;
+                } catch (e) {}
+            },
+
+            // Statistics
+            async runStatistics() {
+                try {
+                    const resp = await this.authFetch('/api/results/statistics/run', { method: 'POST' });
+                    const data = await resp.json();
+                    if (resp.ok) { this.scriptRunning = true; this.notify('success', 'Statistics script started'); }
+                    else { this.notify('error', data.detail || 'Failed'); }
+                } catch (e) { this.notify('error', 'Failed to run statistics'); }
+            },
+
+            // Trial modal
+            async openTrialModal(t) {
+                this.trialModal.title = `${this.shortPlanner(t.planner)} / ${t.field} / ${t.trial}`;
+                this.trialModal.imagePath = `/api/results/image/trials/${t.planner}/${t.field}/${t.trial}/figures/`;
+                // Fetch full summary
+                try {
+                    const resp = await this.authFetch(`/api/results/trial/${t.planner}/${t.field}/${t.trial}`);
+                    const data = await resp.json();
+                    this.trialModal.summary = data.summary || {};
+                } catch (e) { this.trialModal.summary = {}; }
+                this.trialModal.show = true;
+            },
+
+            // Host VNC
+            async checkHostVnc() {
+                try {
+                    const resp = await this.authFetch('/api/host/vnc/status');
+                    const data = await resp.json();
+                    this.hostVnc.running = data.running;
+                } catch (e) { this.hostVnc.running = false; }
+            },
+            async startHostVnc() {
+                try {
+                    await this.authFetch('/api/host/vnc/start', { method: 'POST' });
+                    this.hostVnc.running = true;
+                    this.notify('success', 'VNC started');
+                } catch (e) { this.notify('error', 'Failed to start VNC'); }
+            },
+            async stopHostVnc() {
+                try {
+                    await this.authFetch('/api/host/vnc/stop', { method: 'POST' });
+                    this.hostVnc.running = false;
+                    this.notify('success', 'VNC stopped');
+                } catch (e) { this.notify('error', 'Failed to stop VNC'); }
+            },
+
+            // Helpers
+            shortPlanner(p) {
+                const map = {
+                    exact: 'Exact', analytical: 'Analytical', pose_aware: 'Pose-Aware',
+                    nonstationary_exact: 'NS-Exact', nonstationary_pose_aware: 'NS-PoseAware',
+                    nonstationary_exact_weighted: 'NS-Exact-W', nonstationary_pose_aware_weighted: 'NS-PoseAware-W'
+                };
+                return map[p] || p;
+            },
+            getWorkerJob(slot) {
+                const w = (this.orchestrator.workers || {})[String(slot)];
+                return w ? w.job : null;
+            },
+            getWorkerSamples(slot) {
+                const w = (this.orchestrator.workers || {})[String(slot)];
+                return w ? Math.min((w.samples || 0), 100) : 0;
+            },
+            getWorkerSamplesRaw(slot) {
+                const w = (this.orchestrator.workers || {})[String(slot)];
+                return w ? (w.samples || 0) : 0;
+            },
+            getWorkerProgressImage(slot) {
+                const job = this.getWorkerJob(slot);
+                if (!job) return null;
+                // job format: "planner/field/trial" e.g. "exact/radial/1"
+                const parts = job.split('/');
+                if (parts.length < 3) return null;
+                const [planner, field, trialNum] = parts;
+                const trial = `trial_${String(trialNum).padStart(3, '0')}`;
+                return `/api/results/image/trials/${planner}/${field}/${trial}/figures/progress.png`;
+            },
+            formatElapsed(seconds) {
+                if (!seconds) return '0:00';
+                const h = Math.floor(seconds / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                const s = Math.floor(seconds % 60);
+                return h > 0 ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`;
+            },
+            getCsvCellClass(header, value) {
+                if (header === 'effect' || header === 'effect_size') {
+                    if (value === 'large') return 'effect-large';
+                    if (value === 'medium') return 'effect-medium';
+                    if (value === 'small') return 'effect-small';
+                    if (value === 'negligible') return 'effect-negligible';
+                }
+                if ((header.includes('_p') || header === 'wilcoxon_p' || header === 'ttest_p') && value) {
+                    const n = parseFloat(value);
+                    if (!isNaN(n) && n < 0.05) return 'p-significant';
+                }
+                return '';
+            },
+            formatCsvCell(header, value) {
+                if (value === undefined || value === null) return '-';
+                const n = parseFloat(value);
+                if (isNaN(n)) return value;
+                if (header.includes('_p') || header === 'wilcoxon_p' || header === 'ttest_p') {
+                    return n < 0.0001 ? n.toExponential(2) : n.toFixed(4);
+                }
+                if (header.includes('cohens_d') || header.includes('ci_') || header === 'pct' || header === 'pct_improvement') {
+                    return n.toFixed(3);
+                }
+                if (header.includes('mean') || header === 'diff' || header === 'mean_diff') {
+                    return n.toFixed(4);
+                }
+                return value;
+            },
+            notify(type, message) {
+                this.notifications.push({ type, message });
+                setTimeout(() => this.notifications.shift(), 4000);
+            },
+            logout() {
+                sessionStorage.removeItem('auth');
+                sessionStorage.removeItem('username');
+                window.location.href = '/login';
             }
-        }
+        };
+    }
     </script>
 </body>
 </html>

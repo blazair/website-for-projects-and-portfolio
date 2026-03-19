@@ -1,0 +1,6 @@
+type,lat_scaled,lon_scaled,height,standardized_height,pvalue,significant
+hot,-0.4378,-1.6370,13.0601,2.6363,0.000000,True
+hot,0.6365,0.4816,13.0027,0.6319,0.000000,True
+cold,-0.7004,0.3165,12.9788,0.2029,0.000000,True
+cold,0.9946,-0.5364,12.9714,0.4591,0.000000,True
+cold,-0.5332,1.4721,12.9838,0.0256,0.652653,False

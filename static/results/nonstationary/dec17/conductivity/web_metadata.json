@@ -1,0 +1,142 @@
+{
+  "gp_type": "nonstationary",
+  "variable_label": "Conductivity (\u03bcS/cm)",
+  "unit": "\u03bcS/cm",
+  "bounds": [
+    [
+      33.43034442901409,
+      -111.92846394335353
+    ],
+    [
+      33.43053313645296,
+      -111.92819506525541
+    ]
+  ],
+  "mean_range": [
+    1541.7286376953125,
+    1544.1065673828125
+  ],
+  "uncertainty_range": [
+    0.12251275032758713,
+    0.5898361802101135
+  ],
+  "grid_size": 150,
+  "peaks": [
+    {
+      "lat": 33.430347297989385,
+      "lon": -111.92841362215238,
+      "type": "cold",
+      "height": 1541.7286,
+      "pvalue": 0.001683,
+      "significant": true
+    },
+    {
+      "lat": 33.430512490912385,
+      "lon": -111.92844403841494,
+      "type": "hot",
+      "height": 1544.1066,
+      "pvalue": 0.029614,
+      "significant": true
+    },
+    {
+      "lat": 33.43038506348213,
+      "lon": -111.92839073226044,
+      "type": "hot",
+      "height": 1543.6237,
+      "pvalue": 0.372566,
+      "significant": false
+    },
+    {
+      "lat": 33.4304300743466,
+      "lon": -111.92823715699541,
+      "type": "cold",
+      "height": 1542.8408,
+      "pvalue": 0.814418,
+      "significant": false
+    },
+    {
+      "lat": 33.43046625771402,
+      "lon": -111.92842563436291,
+      "type": "cold",
+      "height": 1542.9353,
+      "pvalue": 0.819598,
+      "significant": false
+    },
+    {
+      "lat": 33.43041082292752,
+      "lon": -111.92829786097596,
+      "type": "hot",
+      "height": 1543.3014,
+      "pvalue": 0.823083,
+      "significant": false
+    },
+    {
+      "lat": 33.43048118324788,
+      "lon": -111.92827352460279,
+      "type": "hot",
+      "height": 1543.2793,
+      "pvalue": 0.829344,
+      "significant": false
+    },
+    {
+      "lat": 33.43034762762675,
+      "lon": -111.9282022417499,
+      "type": "hot",
+      "height": 1543.0958,
+      "pvalue": 0.911793,
+      "significant": false
+    },
+    {
+      "lat": 33.430347600784565,
+      "lon": -111.92820582831227,
+      "type": "hot",
+      "height": 1543.0958,
+      "pvalue": 0.917596,
+      "significant": false
+    },
+    {
+      "lat": 33.430347667833665,
+      "lon": -111.92819686940962,
+      "type": "hot",
+      "height": 1543.0958,
+      "pvalue": 0.921965,
+      "significant": false
+    },
+    {
+      "lat": 33.430347654412664,
+      "lon": -111.9281986626908,
+      "type": "hot",
+      "height": 1543.0958,
+      "pvalue": 0.923286,
+      "significant": false
+    },
+    {
+      "lat": 33.43034761420568,
+      "lon": -111.9282040350311,
+      "type": "hot",
+      "height": 1543.0958,
+      "pvalue": 0.938679,
+      "significant": false
+    },
+    {
+      "lat": 33.430421268129706,
+      "lon": -111.9284090294943,
+      "type": "cold",
+      "height": 1542.8766,
+      "pvalue": 0.939115,
+      "significant": false
+    },
+    {
+      "lat": 33.43034764099165,
+      "lon": -111.92820045597199,
+      "type": "hot",
+      "height": 1543.0958,
+      "pvalue": 0.963952,
+      "significant": false
+    }
+  ],
+  "overlay_mean": "overlay_mean.png",
+  "overlay_uncertainty": "overlay_uncertainty.png",
+  "colorbar_mean": "colorbar_mean.png",
+  "colorbar_uncertainty": "colorbar_uncertainty.png"
+}

@@ -1,0 +1,142 @@
+{
+  "gp_type": "nonstationary",
+  "variable_label": "pH (pH)",
+  "unit": "pH",
+  "bounds": [
+    [
+      33.43030987044585,
+      -111.92957186595468
+    ],
+    [
+      33.43156161709365,
+      -111.92824051630241
+    ]
+  ],
+  "mean_range": [
+    8.987327575683594,
+    9.103215217590332
+  ],
+  "uncertainty_range": [
+    0.0034699656534940004,
+    0.029360933229327202
+  ],
+  "grid_size": 150,
+  "peaks": [
+    {
+      "lat": 33.43103983451335,
+      "lon": -111.92892055270639,
+      "type": "hot",
+      "height": 9.1032,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43081491351457,
+      "lon": -111.92890048801651,
+      "type": "hot",
+      "height": 9.1018,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43134840123206,
+      "lon": -111.9288973229488,
+      "type": "hot",
+      "height": 9.1009,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.431049819001444,
+      "lon": -111.92869950052855,
+      "type": "hot",
+      "height": 9.1006,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.431300056144075,
+      "lon": -111.92867561988436,
+      "type": "hot",
+      "height": 9.1001,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.431334526862024,
+      "lon": -111.92852558835199,
+      "type": "hot",
+      "height": 9.1,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43110194003776,
+      "lon": -111.92841692760116,
+      "type": "hot",
+      "height": 9.0993,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43062734298348,
+      "lon": -111.92834996268178,
+      "type": "hot",
+      "height": 9.0984,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.4310435230193,
+      "lon": -111.92953991081254,
+      "type": "cold",
+      "height": 9.0704,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43105185136819,
+      "lon": -111.92953999960085,
+      "type": "cold",
+      "height": 9.0704,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43053033770388,
+      "lon": -111.9290567021837,
+      "type": "cold",
+      "height": 9.0113,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43042498801741,
+      "lon": -111.92865745100936,
+      "type": "cold",
+      "height": 8.9873,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.431199192185495,
+      "lon": -111.92878954936634,
+      "type": "cold",
+      "height": 9.0993,
+      "pvalue": 1.0,
+      "significant": false
+    },
+    {
+      "lat": 33.43117622919653,
+      "lon": -111.92851505391373,
+      "type": "cold",
+      "height": 9.0982,
+      "pvalue": 1.0,
+      "significant": false
+    }
+  ],
+  "overlay_mean": "overlay_mean.png",
+  "overlay_uncertainty": "overlay_uncertainty.png",
+  "colorbar_mean": "colorbar_mean.png",
+  "colorbar_uncertainty": "colorbar_uncertainty.png"
+}

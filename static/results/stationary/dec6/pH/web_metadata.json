@@ -1,0 +1,110 @@
+{
+  "gp_type": "stationary",
+  "variable_label": "pH (pH)",
+  "unit": "pH",
+  "bounds": [
+    [
+      33.43030987044585,
+      -111.92957186595468
+    ],
+    [
+      33.43156161709365,
+      -111.92824051630241
+    ]
+  ],
+  "mean_range": [
+    8.986141204833984,
+    9.102713584899902
+  ],
+  "uncertainty_range": [
+    0.020109619945287704,
+    0.02950545772910118
+  ],
+  "grid_size": 150,
+  "peaks": [
+    {
+      "lat": 33.43104822891819,
+      "lon": -111.9289118223146,
+      "type": "hot",
+      "height": 9.1027,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43081497978307,
+      "lon": -111.92889164009854,
+      "type": "hot",
+      "height": 9.1023,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.431323416181954,
+      "lon": -111.92889705676511,
+      "type": "hot",
+      "height": 9.1009,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43105801484125,
+      "lon": -111.92871728512284,
+      "type": "hot",
+      "height": 9.1003,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43130111590548,
+      "lon": -111.92853408121748,
+      "type": "hot",
+      "height": 9.0998,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.431143480633516,
+      "lon": -111.92843506724618,
+      "type": "hot",
+      "height": 9.0993,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43068534160404,
+      "lon": -111.9283948232595,
+      "type": "hot",
+      "height": 9.0955,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43052194307337,
+      "lon": -111.92906546133113,
+      "type": "cold",
+      "height": 9.0134,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43041672591605,
+      "lon": -111.92864851442928,
+      "type": "cold",
+      "height": 8.9861,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.431199324707386,
+      "lon": -111.92877185345182,
+      "type": "cold",
+      "height": 9.0993,
+      "pvalue": 1.0,
+      "significant": false
+    }
+  ],
+  "overlay_mean": "overlay_mean.png",
+  "overlay_uncertainty": "overlay_uncertainty.png",
+  "colorbar_mean": "colorbar_mean.png",
+  "colorbar_uncertainty": "colorbar_uncertainty.png"
+}

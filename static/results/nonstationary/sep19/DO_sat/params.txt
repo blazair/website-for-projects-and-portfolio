@@ -1,0 +1,9 @@
+signal_var: 75.897072
+noise: 3.013409
+mean: 2.644436
+loss: 2.330342
+y_mean: 115.827543
+domain: [-2.917, 3.335]
+n_total: 1612
+n_train: 800
+device: cuda

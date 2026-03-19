@@ -1,0 +1,86 @@
+{
+  "gp_type": "nonstationary",
+  "variable_label": "Chlorophyll (\u03bcg/L)",
+  "unit": "\u03bcg/L",
+  "bounds": [
+    [
+      33.43034442901409,
+      -111.92846394335353
+    ],
+    [
+      33.43053313645296,
+      -111.92819506525541
+    ]
+  ],
+  "mean_range": [
+    9.604652404785156,
+    24.881990432739258
+  ],
+  "uncertainty_range": [
+    0.2791568338871002,
+    5.372395992279053
+  ],
+  "grid_size": 150,
+  "peaks": [
+    {
+      "lat": 33.43043579136696,
+      "lon": -111.92831066577502,
+      "type": "cold",
+      "height": 9.8879,
+      "pvalue": 0.833855,
+      "significant": false
+    },
+    {
+      "lat": 33.430433828340966,
+      "lon": -111.9284055838846,
+      "type": "hot",
+      "height": 23.1065,
+      "pvalue": 0.847493,
+      "significant": false
+    },
+    {
+      "lat": 33.430357657194186,
+      "lon": -111.9283689493763,
+      "type": "hot",
+      "height": 19.7661,
+      "pvalue": 0.88688,
+      "significant": false
+    },
+    {
+      "lat": 33.43038832919294,
+      "lon": -111.92845704871289,
+      "type": "hot",
+      "height": 24.882,
+      "pvalue": 0.900351,
+      "significant": false
+    },
+    {
+      "lat": 33.43049742578201,
+      "lon": -111.92844746485285,
+      "type": "hot",
+      "height": 21.5012,
+      "pvalue": 0.91723,
+      "significant": false
+    },
+    {
+      "lat": 33.4304485749775,
+      "lon": -111.92827676430058,
+      "type": "cold",
+      "height": 9.8334,
+      "pvalue": 0.941166,
+      "significant": false
+    },
+    {
+      "lat": 33.43038755492048,
+      "lon": -111.92839255221293,
+      "type": "cold",
+      "height": 9.6047,
+      "pvalue": 1.0,
+      "significant": false
+    }
+  ],
+  "overlay_mean": "overlay_mean.png",
+  "overlay_uncertainty": "overlay_uncertainty.png",
+  "colorbar_mean": "colorbar_mean.png",
+  "colorbar_uncertainty": "colorbar_uncertainty.png"
+}

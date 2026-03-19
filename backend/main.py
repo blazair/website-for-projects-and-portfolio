@@ -23,12 +23,26 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
+from collections import deque
+from threading import Thread, Lock
 import re
+import csv
 
 # Get absolute paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = BASE_DIR / "frontend" / "templates"
 STATIC_DIR = BASE_DIR / "frontend" / "static"
+WORKSPACE_ROOT = Path(__file__).resolve().parent.parent.parent  # aquatic-mapping/
+DATA_DIR = WORKSPACE_ROOT / "data"
+TRIALS_DIR = DATA_DIR / "trials"
+STATISTICS_DIR = DATA_DIR / "statistics"
+SCRIPTS_DIR = DATA_DIR / "scripts"
+ORCHESTRATOR_SCRIPT = WORKSPACE_ROOT / "container" / "info_gain" / "orchestrator.py"
+RECON_VENV_PYTHON = WORKSPACE_ROOT / "reconstruction" / "venv" / "bin" / "python"
+ALL_FIELDS = ["radial", "x_compress", "y_compress", "x_compress_tilt", "y_compress_tilt"]
+ALL_PLANNERS = ["exact", "analytical", "nonstationary_exact", "nonstationary_pose_aware",
+                "nonstationary_exact_weighted", "nonstationary_pose_aware_weighted"]
+VNC_PORTS = {0: 6090, 1: 6091, 2: 6092, 3: 6093, 4: 6094, 5: 6095}
 
 app = FastAPI(title="Aquatic Mapping Control Panel")
 
@@ -101,8 +115,156 @@ class ReconstructionRequest(BaseModel):
     method: str = "all"  # standard, mchutchon, girard, all
     kernel: str = "all"  # rbf, exponential, matern15, matern25, all
 
+# New data models for orchestrator
+class OrchestratorRequest(BaseModel):
+    start_trial: int = 1
+    end_trial: int = 15
+    fields: list[str] = ALL_FIELDS
+    planners: list[str] = ALL_PLANNERS
+    workers: int = 4
+
+class OrchestratorCleanRequest(BaseModel):
+    mode: str = "all"  # "all" or "range"
+    start_trial: int = 1
+    end_trial: int = 15
+    planners: list[str] = ALL_PLANNERS
+    backup: bool = True
+
 # Store for running reconstructions
 reconstruction_processes = {}
+
+# ============================================================================
+# Orchestrator Manager - Launch/stop orchestrator.py subprocess
+# ============================================================================
+class OrchestratorManager:
+    def __init__(self):
+        self._process = None
+        self._log_buffer = deque(maxlen=500)
+        self._lock = Lock()
+        self._reader_thread = None
+
+    def start(self, config: OrchestratorRequest):
+        if self.is_running():
+            raise RuntimeError("Orchestrator already running")
+        cmd = [
+            "python3", str(ORCHESTRATOR_SCRIPT),
+            "--start-trial", str(config.start_trial),
+            "--end-trial", str(config.end_trial),
+            "--fields", ",".join(config.fields),
+            "--planners", ",".join(config.planners),
+            "--workers", str(config.workers),
+        ]
+        self._log_buffer.clear()
+        self._process = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, bufsize=1, cwd=str(WORKSPACE_ROOT)
+        )
+        self._reader_thread = Thread(target=self._read_output, daemon=True)
+        self._reader_thread.start()
+
+    def start_retry(self, config: OrchestratorRequest):
+        if self.is_running():
+            raise RuntimeError("Orchestrator already running")
+        cmd = [
+            "python3", str(ORCHESTRATOR_SCRIPT),
+            "--start-trial", str(config.start_trial),
+            "--end-trial", str(config.end_trial),
+            "--fields", ",".join(config.fields),
+            "--planners", ",".join(config.planners),
+            "--workers", str(config.workers),
+            "--retry-missing",
+        ]
+        self._log_buffer.clear()
+        self._process = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, bufsize=1, cwd=str(WORKSPACE_ROOT)
+        )
+        self._reader_thread = Thread(target=self._read_output, daemon=True)
+        self._reader_thread.start()
+
+    def _read_output(self):
+        try:
+            for line in self._process.stdout:
+                with self._lock:
+                    self._log_buffer.append(line.rstrip('\n'))
+        except (ValueError, OSError):
+            pass
+
+    def stop(self):
+        if self._process and self._process.poll() is None:
+            self._process.terminate()
+            try:
+                self._process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                self._process.kill()
+        # Clean up straggler containers
+        for slot in range(6):
+            subprocess.run(["docker", "stop", f"worker_{slot}"], capture_output=True, timeout=15)
+            subprocess.run(["docker", "rm", "-f", f"worker_{slot}"], capture_output=True, timeout=5)
+
+    def get_status(self):
+        status_file = TRIALS_DIR / "orchestrator_status.json"
+        if status_file.exists():
+            try:
+                with open(status_file) as f:
+                    return json.load(f)
+            except (json.JSONDecodeError, OSError):
+                pass
+        return {"state": "idle"}
+
+    def get_logs(self, last_n: int = 100) -> list[str]:
+        with self._lock:
+            lines = list(self._log_buffer)
+        return lines[-last_n:]
+
+    def is_running(self) -> bool:
+        return self._process is not None and self._process.poll() is None
+
+orchestrator_manager = OrchestratorManager()
+
+# ============================================================================
+# Script Runner - Run arbitrary scripts (e.g. compare_all_planners.py)
+# ============================================================================
+class ScriptRunner:
+    def __init__(self):
+        self._process = None
+        self._log_buffer = deque(maxlen=500)
+        self._lock = Lock()
+        self._reader_thread = None
+
+    def run(self, script_path: Path, python_bin: str = None):
+        if self.is_running():
+            raise RuntimeError("Script already running")
+        py = python_bin or str(RECON_VENV_PYTHON)
+        self._log_buffer.clear()
+        self._process = subprocess.Popen(
+            [py, str(script_path)],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, bufsize=1, cwd=str(script_path.parent)
+        )
+        self._reader_thread = Thread(target=self._read_output, daemon=True)
+        self._reader_thread.start()
+
+    def _read_output(self):
+        try:
+            for line in self._process.stdout:
+                with self._lock:
+                    self._log_buffer.append(line.rstrip('\n'))
+        except (ValueError, OSError):
+            pass
+
+    def get_output(self) -> list[str]:
+        with self._lock:
+            return list(self._log_buffer)
+
+    def is_running(self) -> bool:
+        return self._process is not None and self._process.poll() is None
+
+    def stop(self):
+        if self._process and self._process.poll() is None:
+            self._process.kill()
+
+script_runner = ScriptRunner()
 
 # ============================================================================
 # Batch Manager - Continuous batch execution with auto-start
@@ -203,6 +365,14 @@ async def landing_page():
     if index_path.exists():
         return FileResponse(index_path, media_type="text/html")
     return RedirectResponse(url="/login")
+
+@app.get("/survey.html", response_class=HTMLResponse)
+async def survey_page():
+    """Survey visualization page - no auth required"""
+    survey_path = BASE_DIR / "survey.html"
+    if survey_path.exists():
+        return FileResponse(survey_path, media_type="text/html")
+    raise HTTPException(status_code=404, detail="Survey page not found")
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
@@ -528,7 +698,7 @@ async def delete_trial_data(trial_id: int, username: str = Depends(verify_creden
     data_dir = os.path.expanduser("~/workspaces/aquatic-mapping/src/sampling/data/missions")
     trial_data_path = os.path.join(data_dir, f"trial_{trial_id}")
 
-    results_dir = os.path.expanduser("~/workspaces/aquatic-mapping/reconstruction/results")
+    results_dir = os.path.expanduser("~/workspaces/aquatic-mapping/data/reconstruction")
     trial_results_path = os.path.join(results_dir, f"trial_{trial_id}")
 
     deleted = []
@@ -620,7 +790,7 @@ async def start_reconstruction(trial_id: int, request: ReconstructionRequest, us
         cmd = [venv_python, script_path, "all", str(trial_id), "all"]
 
         # Create results directory and log file for output
-        results_dir = os.path.expanduser(f"~/workspaces/aquatic-mapping/reconstruction/results/trial_{trial_id}")
+        results_dir = os.path.expanduser(f"~/workspaces/aquatic-mapping/data/reconstruction/trial_{trial_id}")
         os.makedirs(results_dir, exist_ok=True)
         log_file = os.path.join(results_dir, "reconstruction.log")
 
@@ -669,7 +839,7 @@ async def get_reconstruction_status(trial_id: int, username: str = Depends(verif
 
         # If failed, try to read error from log
         if return_code != 0:
-            log_file = os.path.expanduser(f"~/workspaces/aquatic-mapping/reconstruction/results/trial_{trial_id}/reconstruction.log")
+            log_file = os.path.expanduser(f"~/workspaces/aquatic-mapping/data/reconstruction/trial_{trial_id}/reconstruction.log")
             if os.path.exists(log_file):
                 try:
                     with open(log_file, 'r') as f:
@@ -695,7 +865,7 @@ async def get_reconstruction_status(trial_id: int, username: str = Depends(verif
 @app.get("/api/reconstruct/{trial_id}/results")
 async def get_reconstruction_results(trial_id: int, username: str = Depends(verify_credentials)):
     """Get reconstruction results (metrics) for a trial"""
-    results_dir = os.path.expanduser(f"~/workspaces/aquatic-mapping/reconstruction/results/trial_{trial_id}")
+    results_dir = os.path.expanduser(f"~/workspaces/aquatic-mapping/data/reconstruction/trial_{trial_id}")
 
     if not os.path.exists(results_dir):
         raise HTTPException(status_code=404, detail=f"No reconstruction results for trial {trial_id}")
@@ -755,7 +925,7 @@ async def get_reconstruction_logs(trial_id: int, username: str = Depends(verify_
 @app.get("/api/reconstruct/{trial_id}/images")
 async def get_reconstruction_images(trial_id: int, username: str = Depends(verify_credentials)):
     """Get list of reconstruction result images"""
-    results_dir = os.path.expanduser(f"~/workspaces/aquatic-mapping/reconstruction/results/trial_{trial_id}")
+    results_dir = os.path.expanduser(f"~/workspaces/aquatic-mapping/data/reconstruction/trial_{trial_id}")
 
     if not os.path.exists(results_dir):
         return {"images": []}
@@ -776,7 +946,7 @@ async def get_reconstruction_images(trial_id: int, username: str = Depends(verif
 @app.get("/api/reconstruct/{trial_id}/image/{image_path:path}")
 async def get_reconstruction_image(trial_id: int, image_path: str):
     """Serve a reconstruction result image (no auth - public images)"""
-    results_dir = os.path.expanduser(f"~/workspaces/aquatic-mapping/reconstruction/results/trial_{trial_id}")
+    results_dir = os.path.expanduser(f"~/workspaces/aquatic-mapping/data/reconstruction/trial_{trial_id}")
     full_path = os.path.join(results_dir, image_path)
 
     # Security check - ensure path is within results dir
@@ -796,7 +966,7 @@ async def generate_comparison_heatmap(trial_id: int, username: str = Depends(ver
     script_path = os.path.join(reconstruction_dir, "compare_all_methods.py")
 
     # Check if trial results exist
-    results_dir = os.path.expanduser(f"~/workspaces/aquatic-mapping/reconstruction/results/trial_{trial_id}")
+    results_dir = os.path.expanduser(f"~/workspaces/aquatic-mapping/data/reconstruction/trial_{trial_id}")
     if not os.path.exists(results_dir):
         raise HTTPException(status_code=404, detail=f"No reconstruction results for trial {trial_id}")
 
@@ -959,12 +1129,242 @@ async def websocket_endpoint(websocket: WebSocket):
             status = {
                 "containers": get_simulation_containers(),
                 "system": get_system_stats(),
+                "orchestrator": orchestrator_manager.get_status(),
+                "orchestrator_running": orchestrator_manager.is_running(),
+                "script_running": script_runner.is_running(),
                 "timestamp": datetime.now().isoformat()
             }
             await websocket.send_json(status)
             await asyncio.sleep(2)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+
+# ============================================================================
+# Orchestrator API Routes
+# ============================================================================
+
+@app.post("/api/orchestrator/start")
+async def start_orchestrator(config: OrchestratorRequest, username: str = Depends(verify_credentials)):
+    """Launch orchestrator with given config"""
+    try:
+        orchestrator_manager.start(config)
+        return {"success": True, "message": "Orchestrator started"}
+    except RuntimeError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/orchestrator/stop")
+async def stop_orchestrator(username: str = Depends(verify_credentials)):
+    """Stop orchestrator and clean up worker containers"""
+    orchestrator_manager.stop()
+    return {"success": True, "message": "Orchestrator stopped"}
+
+@app.get("/api/orchestrator/status")
+async def get_orchestrator_status(username: str = Depends(verify_credentials)):
+    """Read orchestrator_status.json"""
+    return orchestrator_manager.get_status()
+
+@app.get("/api/orchestrator/logs")
+async def get_orchestrator_logs(last_n: int = 100, username: str = Depends(verify_credentials)):
+    """Return ring buffer lines"""
+    return {"logs": orchestrator_manager.get_logs(last_n)}
+
+@app.post("/api/orchestrator/retry")
+async def retry_orchestrator(config: OrchestratorRequest, username: str = Depends(verify_credentials)):
+    """Retry missing trials"""
+    try:
+        orchestrator_manager.start_retry(config)
+        return {"success": True, "message": "Orchestrator started in retry mode"}
+    except RuntimeError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/orchestrator/clean")
+async def clean_orchestrator(req: OrchestratorCleanRequest, username: str = Depends(verify_credentials)):
+    """Clean trial data (uses docker for root-owned files)"""
+    if orchestrator_manager.is_running():
+        raise HTTPException(status_code=409, detail="Cannot clean while orchestrator is running")
+
+    deleted = []
+    errors = []
+    uid = os.getuid()
+    gid = os.getgid()
+
+    # Optional backup
+    if req.backup:
+        backup_dir = DATA_DIR / f"trials_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        try:
+            if TRIALS_DIR.exists():
+                shutil.copytree(TRIALS_DIR, backup_dir, dirs_exist_ok=True)
+                deleted.append(f"Backed up to {backup_dir.name}")
+        except Exception as e:
+            errors.append(f"Backup failed: {e}")
+
+    for planner in req.planners:
+        planner_dir = TRIALS_DIR / planner
+        if not planner_dir.exists():
+            continue
+        for field in ALL_FIELDS:
+            field_dir = planner_dir / field
+            if not field_dir.exists():
+                continue
+            if req.mode == "all":
+                trial_dirs = sorted(field_dir.iterdir())
+            else:
+                trial_dirs = [
+                    field_dir / f"trial_{t:03d}"
+                    for t in range(req.start_trial, req.end_trial + 1)
+                ]
+            for td in trial_dirs:
+                if not td.exists() or not td.is_dir():
+                    continue
+                rel = td.relative_to(WORKSPACE_ROOT)
+                try:
+                    subprocess.run(
+                        ["docker", "run", "--rm",
+                         "-v", f"{WORKSPACE_ROOT}:/workspace",
+                         "ubuntu:24.04", "rm", "-rf", f"/workspace/{rel}"],
+                        capture_output=True, timeout=30
+                    )
+                    deleted.append(str(rel))
+                except Exception as e:
+                    errors.append(f"Failed to delete {rel}: {e}")
+
+    return {"success": len(errors) == 0, "deleted": deleted, "errors": errors}
+
+@app.post("/api/worker/{slot}/kill")
+async def kill_worker(slot: int, username: str = Depends(verify_credentials)):
+    """Kill a specific worker container"""
+    name = f"worker_{slot}"
+    subprocess.run(["docker", "stop", name], capture_output=True, timeout=15)
+    subprocess.run(["docker", "rm", "-f", name], capture_output=True, timeout=5)
+    return {"success": True, "message": f"Worker {slot} killed"}
+
+# ============================================================================
+# Results API Routes
+# ============================================================================
+
+@app.get("/api/results/trials")
+async def get_results_trials(username: str = Depends(verify_credentials)):
+    """Walk data/trials/, list all trials with summary.json metrics"""
+    results = []
+    if not TRIALS_DIR.exists():
+        return results
+    for planner_dir in sorted(TRIALS_DIR.iterdir()):
+        if not planner_dir.is_dir() or planner_dir.name.startswith('.'):
+            continue
+        planner = planner_dir.name
+        if planner not in ALL_PLANNERS and planner not in ["pose_aware"]:
+            continue
+        for field_dir in sorted(planner_dir.iterdir()):
+            if not field_dir.is_dir():
+                continue
+            field = field_dir.name
+            for trial_dir in sorted(field_dir.iterdir()):
+                if not trial_dir.is_dir() or not trial_dir.name.startswith("trial_"):
+                    continue
+                summary_file = trial_dir / "summary.json"
+                summary = {}
+                if summary_file.exists():
+                    try:
+                        with open(summary_file) as f:
+                            summary = json.load(f)
+                    except (json.JSONDecodeError, OSError):
+                        pass
+                results.append({
+                    "planner": planner,
+                    "field": field,
+                    "trial": trial_dir.name,
+                    "has_summary": summary_file.exists(),
+                    "rmse": summary.get("reconstruction_rmse"),
+                    "mae": summary.get("reconstruction_mae"),
+                    "travel_cost": summary.get("total_travel_cost"),
+                    "info_gain": summary.get("cumulative_info_gain"),
+                    "samples": summary.get("total_samples"),
+                })
+    return results
+
+@app.get("/api/results/trial/{planner}/{field}/{trial}")
+async def get_result_trial(planner: str, field: str, trial: str, username: str = Depends(verify_credentials)):
+    """Single trial summary.json + figure filenames"""
+    trial_dir = TRIALS_DIR / planner / field / trial
+    if not trial_dir.exists():
+        raise HTTPException(status_code=404, detail="Trial not found")
+    summary = {}
+    summary_file = trial_dir / "summary.json"
+    if summary_file.exists():
+        try:
+            with open(summary_file) as f:
+                summary = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            pass
+    figures = []
+    fig_dir = trial_dir / "figures"
+    if fig_dir.exists():
+        for img in sorted(fig_dir.iterdir()):
+            if img.suffix == ".png":
+                figures.append(img.name)
+    return {"summary": summary, "figures": figures}
+
+@app.get("/api/results/statistics")
+async def get_statistics_files(username: str = Depends(verify_credentials)):
+    """List all files in data/statistics/"""
+    files = []
+    if STATISTICS_DIR.exists():
+        for f in sorted(STATISTICS_DIR.iterdir()):
+            if f.is_file():
+                files.append({"name": f.name, "size": f.stat().st_size, "ext": f.suffix})
+    return files
+
+@app.post("/api/results/statistics/run")
+async def run_statistics(username: str = Depends(verify_credentials)):
+    """Run compare_all_planners.py via ScriptRunner"""
+    script = SCRIPTS_DIR / "compare_all_planners.py"
+    if not script.exists():
+        raise HTTPException(status_code=404, detail="compare_all_planners.py not found")
+    try:
+        script_runner.run(script, python_bin=str(RECON_VENV_PYTHON))
+        return {"success": True, "message": "Statistics script started"}
+    except RuntimeError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+@app.get("/api/results/statistics/status")
+async def get_statistics_status(username: str = Depends(verify_credentials)):
+    """ScriptRunner running? + output"""
+    return {
+        "running": script_runner.is_running(),
+        "output": script_runner.get_output()
+    }
+
+@app.get("/api/results/statistics/csv/{filename}")
+async def get_statistics_csv(filename: str, username: str = Depends(verify_credentials)):
+    """Read a CSV file from data/statistics/ and return as JSON"""
+    csv_path = STATISTICS_DIR / filename
+    resolved = csv_path.resolve()
+    if not str(resolved).startswith(str(STATISTICS_DIR.resolve())):
+        raise HTTPException(status_code=403, detail="Access denied")
+    if not resolved.exists() or resolved.suffix != '.csv':
+        raise HTTPException(status_code=404, detail="CSV not found")
+    rows = []
+    with open(resolved, 'r') as f:
+        reader = csv.DictReader(f)
+        headers = reader.fieldnames or []
+        for row in reader:
+            rows.append(row)
+    return {"headers": headers, "rows": rows}
+
+@app.get("/api/results/image/{path:path}")
+async def serve_data_image(path: str):
+    """Serve image from data/ dir (path-traversal protected)"""
+    full_path = (DATA_DIR / path).resolve()
+    if not str(full_path).startswith(str(DATA_DIR.resolve())):
+        raise HTTPException(status_code=403, detail="Access denied")
+    if not full_path.exists():
+        raise HTTPException(status_code=404, detail="Image not found")
+    media = "image/png" if full_path.suffix == ".png" else "image/jpeg"
+    return FileResponse(str(full_path), media_type=media)
 
 # ============================================================================
 # Helper Functions

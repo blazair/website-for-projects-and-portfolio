@@ -1,0 +1,182 @@
+{
+  "gp_type": "nonstationary",
+  "variable_label": "Temperature (\u00b0C)",
+  "unit": "\u00b0C",
+  "bounds": [
+    [
+      33.430276551239245,
+      -111.93037642131016
+    ],
+    [
+      33.43209835965776,
+      -111.92981607449309
+    ]
+  ],
+  "mean_range": [
+    14.019926071166992,
+    15.255870819091797
+  ],
+  "uncertainty_range": [
+    0.011981559917330742,
+    0.43108513951301575
+  ],
+  "grid_size": 150,
+  "peaks": [
+    {
+      "lat": 33.430535667146415,
+      "lon": -111.92997128826106,
+      "type": "hot",
+      "height": 15.2559,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43032581626654,
+      "lon": -111.93029219361556,
+      "type": "hot",
+      "height": 14.8559,
+      "pvalue": 0.115016,
+      "significant": false
+    },
+    {
+      "lat": 33.43041310361522,
+      "lon": -111.93004259678631,
+      "type": "cold",
+      "height": 14.0683,
+      "pvalue": 0.253434,
+      "significant": false
+    },
+    {
+      "lat": 33.430766734813,
+      "lon": -111.93007178633445,
+      "type": "hot",
+      "height": 14.7731,
+      "pvalue": 0.269024,
+      "significant": false
+    },
+    {
+      "lat": 33.430987282225274,
+      "lon": -111.92994343350693,
+      "type": "cold",
+      "height": 14.0997,
+      "pvalue": 0.275577,
+      "significant": false
+    },
+    {
+      "lat": 33.43141348771826,
+      "lon": -111.93005326763053,
+      "type": "cold",
+      "height": 14.0199,
+      "pvalue": 0.28684,
+      "significant": false
+    },
+    {
+      "lat": 33.43169294486887,
+      "lon": -111.93020874583233,
+      "type": "cold",
+      "height": 14.087,
+      "pvalue": 0.328129,
+      "significant": false
+    },
+    {
+      "lat": 33.43066764111046,
+      "lon": -111.93027042319731,
+      "type": "cold",
+      "height": 14.1786,
+      "pvalue": 0.411238,
+      "significant": false
+    },
+    {
+      "lat": 33.431426954796784,
+      "lon": -111.92988276038957,
+      "type": "cold",
+      "height": 14.157,
+      "pvalue": 0.512767,
+      "significant": false
+    },
+    {
+      "lat": 33.431633783477345,
+      "lon": -111.92996484658347,
+      "type": "cold",
+      "height": 14.2485,
+      "pvalue": 0.683322,
+      "significant": false
+    },
+    {
+      "lat": 33.4312534083408,
+      "lon": -111.93025126479492,
+      "type": "cold",
+      "height": 14.2966,
+      "pvalue": 0.753192,
+      "significant": false
+    },
+    {
+      "lat": 33.43068031881553,
+      "lon": -111.93020520598459,
+      "type": "hot",
+      "height": 14.5794,
+      "pvalue": 0.755955,
+      "significant": false
+    },
+    {
+      "lat": 33.43097248085329,
+      "lon": -111.93029182967108,
+      "type": "hot",
+      "height": 14.575,
+      "pvalue": 0.756684,
+      "significant": false
+    },
+    {
+      "lat": 33.43207326537806,
+      "lon": -111.92992959856163,
+      "type": "hot",
+      "height": 14.5262,
+      "pvalue": 0.785518,
+      "significant": false
+    },
+    {
+      "lat": 33.431571497632866,
+      "lon": -111.93013120637649,
+      "type": "hot",
+      "height": 14.4781,
+      "pvalue": 0.893339,
+      "significant": false
+    },
+    {
+      "lat": 33.43118089538841,
+      "lon": -111.93015608413994,
+      "type": "hot",
+      "height": 14.4123,
+      "pvalue": 0.930892,
+      "significant": false
+    },
+    {
+      "lat": 33.431316490563354,
+      "lon": -111.9299723529127,
+      "type": "hot",
+      "height": 14.429,
+      "pvalue": 0.956176,
+      "significant": false
+    },
+    {
+      "lat": 33.43065725724469,
+      "lon": -111.93002342007482,
+      "type": "hot",
+      "height": 14.9309,
+      "pvalue": 1.0,
+      "significant": false
+    },
+    {
+      "lat": 33.43049815818315,
+      "lon": -111.93009071189962,
+      "type": "cold",
+      "height": 14.0353,
+      "pvalue": 1.0,
+      "significant": false
+    }
+  ],
+  "overlay_mean": "overlay_mean.png",
+  "overlay_uncertainty": "overlay_uncertainty.png",
+  "colorbar_mean": "colorbar_mean.png",
+  "colorbar_uncertainty": "colorbar_uncertainty.png"
+}

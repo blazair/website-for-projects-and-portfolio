@@ -1,0 +1,19 @@
+date,variable,variable_label,unit,gp_type,candidates,significant,hot,cold,min_pvalue
+feb15,CDOM,CDOM,ppb,stationary,8,7,6,1,0.0
+feb15,DO_conc,DO Conc.,mg/L,stationary,17,11,6,5,0.0
+feb15,DO_sat,DO Sat.,%,stationary,89,0,0,0,0.131847
+feb15,chlorophyll,Chlorophyll,μg/L,stationary,11,1,1,0,0.001422
+feb15,conductivity,Conductivity,μS/cm,stationary,9,3,0,3,0.012282
+feb15,depth,Depth,m,stationary,11,8,8,0,0.0
+feb15,pH,pH,pH,stationary,12,9,6,3,0.0
+feb15,temperature,Temperature,°C,stationary,15,6,2,4,0.0
+feb15,turbidity,Turbidity,NTU,stationary,11,2,1,1,0.0
+feb15,CDOM,CDOM,ppb,nonstationary,12,10,5,5,0.0
+feb15,DO_conc,DO Conc.,mg/L,nonstationary,15,6,4,2,0.002974
+feb15,DO_sat,DO Sat.,%,nonstationary,19,0,0,0,0.886028
+feb15,chlorophyll,Chlorophyll,μg/L,nonstationary,15,0,0,0,0.636386
+feb15,conductivity,Conductivity,μS/cm,nonstationary,11,0,0,0,0.852792
+feb15,depth,Depth,m,nonstationary,11,7,1,6,0.0
+feb15,pH,pH,pH,nonstationary,11,9,6,3,0.0
+feb15,temperature,Temperature,°C,nonstationary,19,1,1,0,0.0
+feb15,turbidity,Turbidity,NTU,nonstationary,12,1,1,0,0.026489

@@ -1,0 +1,8 @@
+lengthscale: 0.525602
+outputscale: 0.000274
+noise: 0.000377
+mean: 0.005011
+y_mean: -0.059249
+n_total: 1612
+n_train: 800
+device: cuda

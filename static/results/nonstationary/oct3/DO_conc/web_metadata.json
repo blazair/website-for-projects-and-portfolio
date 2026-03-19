@@ -1,0 +1,182 @@
+{
+  "gp_type": "nonstationary",
+  "variable_label": "DO Conc. (mg/L)",
+  "unit": "mg/L",
+  "bounds": [
+    [
+      33.43014129231032,
+      -111.9289438071539
+    ],
+    [
+      33.43072212593315,
+      -111.92637996333197
+    ]
+  ],
+  "mean_range": [
+    9.412939071655273,
+    10.004213333129883
+  ],
+  "uncertainty_range": [
+    0.004725595470517874,
+    0.14014281332492828
+  ],
+  "grid_size": 150,
+  "peaks": [
+    {
+      "lat": 33.430392236662854,
+      "lon": -111.92815072587028,
+      "type": "hot",
+      "height": 9.7483,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.430392364939046,
+      "lon": -111.92813358490062,
+      "type": "hot",
+      "height": 9.7483,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43051300026147,
+      "lon": -111.92813486901636,
+      "type": "hot",
+      "height": 9.8099,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43054701223801,
+      "lon": -111.9276201658394,
+      "type": "hot",
+      "height": 9.7559,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.430504301297866,
+      "lon": -111.92677847831246,
+      "type": "hot",
+      "height": 10.0042,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43049642211121,
+      "lon": -111.92732781043719,
+      "type": "cold",
+      "height": 9.5564,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43038091931448,
+      "lon": -111.92663982963487,
+      "type": "cold",
+      "height": 9.4497,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43022400169613,
+      "lon": -111.9264493319072,
+      "type": "cold",
+      "height": 9.4129,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.430369793048705,
+      "lon": -111.92712042477122,
+      "type": "hot",
+      "height": 9.7252,
+      "pvalue": 7e-06,
+      "significant": true
+    },
+    {
+      "lat": 33.430331707551275,
+      "lon": -111.92868235398109,
+      "type": "hot",
+      "height": 9.7294,
+      "pvalue": 0.000266,
+      "significant": true
+    },
+    {
+      "lat": 33.43043790616032,
+      "lon": -111.9285976410002,
+      "type": "hot",
+      "height": 9.7261,
+      "pvalue": 0.001426,
+      "significant": true
+    },
+    {
+      "lat": 33.430657837183254,
+      "lon": -111.92842829464676,
+      "type": "hot",
+      "height": 9.7179,
+      "pvalue": 0.003183,
+      "significant": true
+    },
+    {
+      "lat": 33.43033342303506,
+      "lon": -111.9274462055359,
+      "type": "cold",
+      "height": 9.5764,
+      "pvalue": 0.007866,
+      "significant": true
+    },
+    {
+      "lat": 33.43030930561132,
+      "lon": -111.92814984308987,
+      "type": "cold",
+      "height": 9.6045,
+      "pvalue": 0.16569,
+      "significant": false
+    },
+    {
+      "lat": 33.4302817153086,
+      "lon": -111.92780623981923,
+      "type": "hot",
+      "height": 9.6772,
+      "pvalue": 0.347599,
+      "significant": false
+    },
+    {
+      "lat": 33.43056783902905,
+      "lon": -111.92786077771686,
+      "type": "cold",
+      "height": 9.6317,
+      "pvalue": 0.815987,
+      "significant": false
+    },
+    {
+      "lat": 33.4304507194447,
+      "lon": -111.92789388227119,
+      "type": "cold",
+      "height": 9.6364,
+      "pvalue": 0.869395,
+      "significant": false
+    },
+    {
+      "lat": 33.43054864884482,
+      "lon": -111.92840992345336,
+      "type": "cold",
+      "height": 9.6902,
+      "pvalue": 1.0,
+      "significant": false
+    },
+    {
+      "lat": 33.4304513977477,
+      "lon": -111.92830590149337,
+      "type": "cold",
+      "height": 9.6851,
+      "pvalue": 1.0,
+      "significant": false
+    }
+  ],
+  "overlay_mean": "overlay_mean.png",
+  "overlay_uncertainty": "overlay_uncertainty.png",
+  "colorbar_mean": "colorbar_mean.png",
+  "colorbar_uncertainty": "colorbar_uncertainty.png"
+}

@@ -3,87 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Room Login - The Chronicle</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <title>Control Room Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --paper: #f4ead5;
-            --paper-cream: #faf6eb;
-            --paper-aged: #e8dcc4;
-            --paper-dark: #d9ccb4;
-            --ink: #1a1a1a;
-            --ink-light: #3d3d3d;
-            --ink-faded: #6a6a6a;
-            --olive: #4a5d23;
-            --orange: #c4640c;
-            --aqua: #2a6a6a;
+            --bg: #000000;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --orange: #ff6b2b;
+            --orange-glow: rgba(255, 107, 43, 0.15);
+            --orange-glow-strong: rgba(255, 107, 43, 0.3);
+            --text: #e8e8e8;
+            --text-secondary: #999999;
+            --text-dim: #555555;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 107, 43, 0.3);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --font-heading: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
-        * {
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        ::selection {
+            background: var(--orange);
+            color: #000;
+        }
+
         body {
-            font-family: 'EB Garamond', Georgia, serif;
-            background: var(--paper);
-            color: var(--ink);
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
             font-size: 16px;
             line-height: 1.6;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
         }
 
-        /* Paper texture */
+        /* Grain overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: overlay;
+        }
+
+        /* Grid background */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            opacity: 0.03;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 80px 80px;
             pointer-events: none;
-            z-index: 1;
+            z-index: 0;
+        }
+
+        /* Ambient glow */
+        .ambient-glow {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: var(--orange);
+            filter: blur(150px);
+            opacity: 0.06;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .login-container {
             position: relative;
             z-index: 2;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             padding: 40px;
-            background: var(--paper-cream);
-            border: 3px solid var(--ink);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .login-container:hover {
+            border-color: var(--border-hover);
+            box-shadow: 0 0 60px var(--orange-glow);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .login-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 32px;
         }
 
         .login-title {
-            font-family: 'Playfair Display', serif;
+            font-family: var(--font-heading);
             font-size: 28px;
             font-weight: 700;
-            letter-spacing: 1px;
+            letter-spacing: -0.5px;
+            color: var(--text);
             margin-bottom: 8px;
-            color: var(--ink);
+        }
+
+        .login-title span {
+            color: var(--orange);
         }
 
         .login-subtitle {
-            font-size: 13px;
+            font-family: var(--font-mono);
+            font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--ink-faded);
+            letter-spacing: 3px;
+            color: var(--text-dim);
         }
 
         .login-divider {
-            height: 2px;
-            background: var(--olive);
-            margin: 20px 0;
-            opacity: 0.3;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 0 0 28px 0;
         }
 
         .form-group {
@@ -92,76 +160,83 @@
 
         .form-label {
             display: block;
-            font-size: 12px;
+            font-family: var(--font-mono);
+            font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--ink-faded);
+            letter-spacing: 2px;
+            color: var(--text-dim);
             margin-bottom: 8px;
-            font-weight: 500;
         }
 
         .form-input {
             width: 100%;
-            padding: 12px 14px;
-            font-family: 'EB Garamond', serif;
-            font-size: 15px;
-            background: var(--paper);
-            border: 2px solid var(--ink-faded);
-            color: var(--ink);
-            transition: all 0.2s;
+            padding: 12px 16px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: none;
         }
 
         .form-input:focus {
-            outline: none;
-            border-color: var(--olive);
-            background: var(--paper-aged);
+            border-color: var(--orange);
+            box-shadow: 0 0 20px var(--orange-glow);
+            background: rgba(255, 107, 43, 0.03);
         }
 
         .form-input::placeholder {
-            color: var(--ink-faded);
+            color: var(--text-dim);
             opacity: 0.6;
         }
 
         .login-button {
             width: 100%;
-            padding: 12px 16px;
-            margin-top: 10px;
-            font-family: 'EB Garamond', serif;
-            font-size: 14px;
+            padding: 14px 20px;
+            margin-top: 8px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            background: var(--olive);
-            color: var(--paper-cream);
-            border: 2px solid var(--olive);
+            letter-spacing: 2px;
+            background: var(--orange);
+            color: #000;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .login-button:hover {
-            background: var(--olive-dark);
-            border-color: var(--olive-dark);
+            background: #ff8c52;
+            box-shadow: 0 0 30px var(--orange-glow-strong);
+            transform: translateY(-2px);
         }
 
         .login-button:active {
-            transform: scale(0.98);
+            transform: scale(0.98) translateY(0);
         }
 
         .login-button:disabled {
-            opacity: 0.5;
+            opacity: 0.4;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .error-message {
             display: none;
-            padding: 12px 14px;
-            margin-bottom: 15px;
-            background: #f8d7da;
-            border: 2px solid #c4640c;
-            color: #721c24;
-            font-size: 13px;
-            border-radius: 0;
-            animation: slideDown 0.3s ease;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            border-radius: 8px;
+            color: #ff6b6b;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .error-message.show {
@@ -171,7 +246,7 @@
         @keyframes slideDown {
             from {
                 opacity: 0;
-                transform: translateY(-10px);
+                transform: translateY(-8px);
             }
             to {
                 opacity: 1;
@@ -181,21 +256,62 @@
 
         .login-footer {
             text-align: center;
-            margin-top: 25px;
-            font-size: 12px;
-            color: var(--ink-faded);
-            border-top: 1px dashed var(--ink-faded);
-            padding-top: 15px;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .login-footer p {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+        }
+
+        .login-footer p:last-child {
+            margin-top: 6px;
+            opacity: 0.6;
+        }
+
+        .login-footer a {
+            color: var(--orange);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .login-footer a:hover {
+            opacity: 0.8;
+        }
+
+        .loading .login-button {
+            position: relative;
+            color: transparent;
         }
 
         .loading .login-button::after {
-            content: ' ⏳';
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            top: 50%;
+            left: 50%;
+            margin-top: -9px;
+            margin-left: -9px;
+            border: 2px solid rgba(0,0,0,0.2);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         @media (max-width: 480px) {
             .login-container {
                 margin: 20px;
                 max-width: 100%;
+                padding: 32px 24px;
             }
 
             .login-title {
@@ -205,9 +321,11 @@
     </style>
 </head>
 <body>
+    <div class="ambient-glow"></div>
+
     <div class="login-container">
         <div class="login-header">
-            <div class="login-title">Control Room</div>
+            <div class="login-title">Control <span>Room</span></div>
             <div class="login-subtitle">Field Reconstruction System</div>
         </div>
 
@@ -245,7 +363,7 @@
 
         <div class="login-footer">
             <p>Aquatic Mapping Control Panel</p>
-            <p style="margin-top: 8px; opacity: 0.7;">Trial Management & GP Reconstruction</p>
+            <p>Trial Management & GP Reconstruction</p>
         </div>
     </div>
 
@@ -271,7 +389,6 @@
             form.classList.add('loading');
 
             try {
-                // Validate credentials via API
                 const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: {
@@ -283,10 +400,8 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Store credentials for dashboard to use
                     sessionStorage.setItem('auth', btoa(username + ':' + password));
                     sessionStorage.setItem('username', username);
-                    // Redirect to dashboard
                     window.location.href = '/dashboard';
                 } else {
                     showError(data.detail || 'Invalid credentials');

@@ -1,0 +1,102 @@
+{
+  "gp_type": "nonstationary",
+  "variable_label": "Depth (m)",
+  "unit": "m",
+  "bounds": [
+    [
+      33.43014129231032,
+      -111.9289438071539
+    ],
+    [
+      33.43072212593315,
+      -111.92637996333197
+    ]
+  ],
+  "mean_range": [
+    -0.09118536114692688,
+    -0.04795894771814346
+  ],
+  "uncertainty_range": [
+    0.0028378681745380163,
+    0.025539932772517204
+  ],
+  "grid_size": 150,
+  "peaks": [
+    {
+      "lat": 33.43030596415882,
+      "lon": -111.92859623583328,
+      "type": "hot",
+      "height": -0.048,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.430543590887034,
+      "lon": -111.92858155798606,
+      "type": "cold",
+      "height": -0.0888,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43040628780143,
+      "lon": -111.92828827888982,
+      "type": "cold",
+      "height": -0.0796,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.430533088050076,
+      "lon": -111.92746553786769,
+      "type": "cold",
+      "height": -0.0912,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43035317336601,
+      "lon": -111.92732628693838,
+      "type": "cold",
+      "height": -0.0876,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43021350621544,
+      "lon": -111.9268440890343,
+      "type": "cold",
+      "height": -0.0815,
+      "pvalue": 0.0,
+      "significant": true
+    },
+    {
+      "lat": 33.43041989468171,
+      "lon": -111.92646855566097,
+      "type": "hot",
+      "height": -0.0641,
+      "pvalue": 0.551486,
+      "significant": false
+    },
+    {
+      "lat": 33.43043284534025,
+      "lon": -111.92725843252319,
+      "type": "hot",
+      "height": -0.0725,
+      "pvalue": 1.0,
+      "significant": false
+    },
+    {
+      "lat": 33.43025592182682,
+      "lon": -111.92722220022218,
+      "type": "hot",
+      "height": -0.0718,
+      "pvalue": 1.0,
+      "significant": false
+    }
+  ],
+  "overlay_mean": "overlay_mean.png",
+  "overlay_uncertainty": "overlay_uncertainty.png",
+  "colorbar_mean": "colorbar_mean.png",
+  "colorbar_uncertainty": "colorbar_uncertainty.png"
+}

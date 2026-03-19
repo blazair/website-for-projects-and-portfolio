@@ -1,0 +1,102 @@
+{
+  "gp_type": "stationary",
+  "variable_label": "Conductivity (\u03bcS/cm)",
+  "unit": "\u03bcS/cm",
+  "bounds": [
+    [
+      33.430276551239245,
+      -111.93037642131016
+    ],
+    [
+      33.43209835965776,
+      -111.92981607449309
+    ]
+  ],
+  "mean_range": [
+    1458.28125,
+    1478.5980224609375
+  ],
+  "uncertainty_range": [
+    1.8091039657592773,
+    2.680276870727539
+  ],
+  "grid_size": 150,
+  "peaks": [
+    {
+      "lat": 33.430400480394496,
+      "lon": -111.93010056042812,
+      "type": "cold",
+      "height": 1458.2812,
+      "pvalue": 0.012282,
+      "significant": true
+    },
+    {
+      "lat": 33.43061933319071,
+      "lon": -111.93020455536309,
+      "type": "cold",
+      "height": 1458.4146,
+      "pvalue": 0.013746,
+      "significant": true
+    },
+    {
+      "lat": 33.43052307122486,
+      "lon": -111.93002561579704,
+      "type": "cold",
+      "height": 1459.7858,
+      "pvalue": 0.031617,
+      "significant": true
+    },
+    {
+      "lat": 33.431693571130836,
+      "lon": -111.93012524507637,
+      "type": "hot",
+      "height": 1478.598,
+      "pvalue": 0.231884,
+      "significant": false
+    },
+    {
+      "lat": 33.43120512769513,
+      "lon": -111.93018176029422,
+      "type": "hot",
+      "height": 1478.093,
+      "pvalue": 0.272374,
+      "significant": false
+    },
+    {
+      "lat": 33.43162198365075,
+      "lon": -111.92990663111823,
+      "type": "hot",
+      "height": 1477.8269,
+      "pvalue": 0.305075,
+      "significant": false
+    },
+    {
+      "lat": 33.431145265104526,
+      "lon": -111.93002498889139,
+      "type": "hot",
+      "height": 1477.65,
+      "pvalue": 0.321677,
+      "significant": false
+    },
+    {
+      "lat": 33.43191425477987,
+      "lon": -111.92997872878644,
+      "type": "hot",
+      "height": 1477.3345,
+      "pvalue": 0.35576,
+      "significant": false
+    },
+    {
+      "lat": 33.43156018133225,
+      "lon": -111.93001489702925,
+      "type": "cold",
+      "height": 1474.6545,
+      "pvalue": 0.997316,
+      "significant": false
+    }
+  ],
+  "overlay_mean": "overlay_mean.png",
+  "overlay_uncertainty": "overlay_uncertainty.png",
+  "colorbar_mean": "colorbar_mean.png",
+  "colorbar_uncertainty": "colorbar_uncertainty.png"
+}

@@ -1,0 +1,17 @@
+date,variable,variable_label,unit,gp_type,candidates,significant,hot,cold,min_pvalue
+dec17,CDOM,CDOM,ppb,stationary,6,6,4,2,0.0
+dec17,DO_conc,DO Conc.,mg/L,stationary,11,5,2,3,0.0
+dec17,DO_sat,DO Sat.,%,stationary,64,3,1,2,0.0
+dec17,chlorophyll,Chlorophyll,μg/L,stationary,5,0,0,0,0.396951
+dec17,conductivity,Conductivity,μS/cm,stationary,17,2,1,1,0.000895
+dec17,depth,Depth,m,stationary,6,5,1,4,0.0
+dec17,pH,pH,pH,stationary,7,7,4,3,0.0
+dec17,temperature,Temperature,°C,stationary,6,5,3,2,0.0
+dec17,CDOM,CDOM,ppb,nonstationary,6,6,4,2,0.0
+dec17,DO_conc,DO Conc.,mg/L,nonstationary,5,4,2,2,0.0
+dec17,DO_sat,DO Sat.,%,nonstationary,26,3,1,2,0.0
+dec17,chlorophyll,Chlorophyll,μg/L,nonstationary,7,0,0,0,0.833855
+dec17,conductivity,Conductivity,μS/cm,nonstationary,14,2,1,1,0.001683
+dec17,depth,Depth,m,nonstationary,8,6,4,2,0.0
+dec17,pH,pH,pH,nonstationary,7,6,1,5,0.0
+dec17,temperature,Temperature,°C,nonstationary,6,5,3,2,0.0
