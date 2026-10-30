@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bharath Vedantha Desikan</title>
+<meta name="description" content="Robotics researcher working on perception and planning for aerial and aquatic robots under positional uncertainty.">
+<script>
+/* settle the theme before first paint: light unless this viewer chose dark */
+(function(){try{var t=localStorage.getItem("bvd-theme");
+document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light");}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..900&family=Source+Serif+4:opsz,wght@8..60,300..600&display=swap">
+<style>
+/* ---------------------------------------------------------------------------
+   Layout concept: a printed survey chart. Sage is the charted fill, cream the
+   paper it is printed on, burgundy the annotation ink. Contour isobands and a
+   tick scale carry structure in place of generic rules and eyebrow labels.
+   Each study reads problem, result, role; method sits behind a disclosure.
+   --------------------------------------------------------------------------- */
+:root{
+  --sage:#A5A79B;
+  --cream:#E8D2B5;
+  --burgundy:#590907;
+  --ink:#241C18;
+  --muted:#4E514A;
+  --series-b:#6E7268;
+  --rule:rgba(36,28,24,.26);
+  --rule-soft:rgba(36,28,24,.12);
+  --on-burgundy:#E8D2B5;
+  --focus:#590907;
+  --tile:rgba(36,28,24,.05);
+  /* the field keeps one identity in both themes: a chart printed in cream on
+     deep burgundy, so its canvas marks never have to chase the theme */
+  --field-bg:#4E0806;
+
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --text:"Source Serif 4",Georgia,"Times New Roman",serif;
+
+  --s1:clamp(.74rem,.7rem + .2vw,.82rem);
+  --s2:clamp(.86rem,.82rem + .2vw,.95rem);
+  --s3:clamp(1rem,.95rem + .3vw,1.13rem);
+  --s4:clamp(1.3rem,1.1rem + .9vw,1.75rem);
+  --s5:clamp(1.9rem,1.4rem + 2.2vw,3rem);
+  --s6:clamp(2.9rem,1.6rem + 6.4vw,7.5rem);
+  --stat:clamp(2rem,1.35rem + 2.5vw,3.3rem);
+
+  --gut-l:max(20px,env(safe-area-inset-left,0px));
+  --gut-r:max(20px,env(safe-area-inset-right,0px));
+  --measure:62ch;
+  --prog:0;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --sage:#1E1A16; --cream:#272019; --burgundy:#D98479; --ink:#EADCC8;
+    --muted:#9B9E93; --series-b:#9B9E93;
+    --rule:rgba(234,220,200,.26); --rule-soft:rgba(234,220,200,.12);
+    --on-burgundy:#1E1A16; --focus:#D98479; --tile:rgba(234,220,200,.06);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --sage:#1E1A16; --cream:#272019; --burgundy:#D98479; --ink:#EADCC8;
+  --muted:#9B9E93; --series-b:#9B9E93;
+  --rule:rgba(234,220,200,.26); --rule-soft:rgba(234,220,200,.12);
+  --on-burgundy:#1E1A16; --focus:#D98479; --tile:rgba(234,220,200,.06);
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;background:var(--sage);color:var(--ink);
+  font-family:var(--text);font-size:var(--s3);line-height:1.62;
+  font-optical-sizing:auto;-webkit-font-smoothing:antialiased;
+}
+img{max-width:100%}
+::selection{background:var(--burgundy);color:var(--on-burgundy)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+
+.band{background:var(--sage)}
+.band--paper{background:var(--cream)}
+.band--ink{background:var(--burgundy);color:var(--on-burgundy)}
+.wrap{
+  max-width:1180px;margin-inline:auto;
+  padding-left:var(--gut-l);padding-right:var(--gut-r);
+  padding-block:clamp(3.5rem,7vw,6.5rem);
+}
+
+.scale{
+  height:13px;width:100%;
+  background-image:
+    repeating-linear-gradient(to right,var(--rule) 0 1px,transparent 1px 9px),
+    repeating-linear-gradient(to right,var(--burgundy) 0 1px,transparent 1px 54px);
+  background-size:100% 6px,100% 13px;
+  background-position:left bottom,left bottom;
+  background-repeat:no-repeat;margin-bottom:1.1rem;
+}
+.band--ink .scale{
+  background-image:
+    repeating-linear-gradient(to right,rgba(232,210,181,.3) 0 1px,transparent 1px 9px),
+    repeating-linear-gradient(to right,var(--on-burgundy) 0 1px,transparent 1px 54px);
+}
+
+h1,h2,h3,h4{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.04}
+h2{font-size:var(--s5);font-weight:800;font-stretch:84%;letter-spacing:-.016em;margin-bottom:2.2rem}
+h3{font-size:var(--s4);font-weight:700;font-stretch:88%;letter-spacing:-.01em}
+p{margin:0 0 1.05em}
+a{color:inherit}
+
+/* ---- navigation with scroll progress ------------------------------------ */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--sage)}
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--sage);border-bottom:1px solid var(--rule)}
+.nav__in{
+  max-width:1180px;margin-inline:auto;
+  padding-left:var(--gut-l);padding-right:var(--gut-r);padding-block:.7rem;
+  display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap;
+}
+.nav__name{font-family:var(--display);font-weight:800;font-stretch:82%;font-size:var(--s2);letter-spacing:.01em;text-decoration:none;margin-right:auto}
+.nav__links{display:flex;gap:1.25rem;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+.nav__links a{font-family:var(--display);font-size:var(--s1);font-weight:500;text-decoration:none;color:var(--muted);padding-bottom:2px;border-bottom:1px solid transparent}
+.nav__links a:hover,.nav__links a:focus-visible{color:var(--ink);border-bottom-color:var(--burgundy)}
+.toggle{font-family:var(--display);font-size:var(--s1);font-weight:600;background:none;border:1px solid var(--rule);color:var(--ink);border-radius:0;padding:.3rem .7rem;cursor:pointer}
+.toggle:hover{border-color:var(--burgundy)}
+.nav__prog{position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none}
+.nav__prog i{display:block;height:100%;width:100%;background:var(--burgundy);transform:scaleX(var(--prog));transform-origin:0 50%}
+@media (max-width:719px){
+  .nav__in{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.45rem .8rem;padding-block:.55rem;align-items:center}
+  .nav__name{margin-right:0}
+  .nav__links{grid-column:1/-1;flex-wrap:nowrap;overflow-x:auto;gap:1.05rem;scrollbar-width:none;-ms-overflow-style:none}
+  .nav__links::-webkit-scrollbar{display:none}
+  .nav__links a{white-space:nowrap}
+}
+
+/* ---- hero ---------------------------------------------------------------- */
+.hero{position:relative;overflow:hidden}
+.hero__in{
+  max-width:1180px;margin-inline:auto;
+  padding-left:var(--gut-l);padding-right:var(--gut-r);
+  padding-block:clamp(2.5rem,5vw,4.5rem) clamp(3rem,6vw,5rem);
+  display:grid;grid-template-columns:minmax(0,1fr);gap:2.5rem;
+}
+@media (min-width:980px){.hero__in{grid-template-columns:minmax(0,1fr) minmax(0,.72fr);gap:3rem;align-items:center}}
+h1{font-size:var(--s6);font-weight:900;font-stretch:76%;letter-spacing:-.028em;text-transform:uppercase;margin-bottom:1.4rem}
+h1 .ln{display:block;overflow:hidden}
+h1 .ln > span{display:block}
+.lede{font-size:var(--s4);line-height:1.36;font-weight:300;max-width:36ch;margin-bottom:2rem}
+.soundings{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.4rem 1.8rem;
+  border-top:1px solid var(--rule);padding-top:1.3rem;margin-bottom:2rem;max-width:34rem;
+}
+@media (min-width:620px){.soundings{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.sounding__v{font-family:var(--display);font-weight:800;font-stretch:84%;font-size:clamp(1.45rem,1.1rem + 1.3vw,2.1rem);line-height:1;font-variant-numeric:tabular-nums;display:block;margin-bottom:.35rem}
+.sounding__l{font-size:var(--s1);color:var(--muted);line-height:1.3;display:block}
+
+.actions{display:flex;flex-wrap:wrap;gap:.7rem}
+.btn{
+  font-family:var(--display);font-size:var(--s2);font-weight:600;text-decoration:none;
+  padding:.62rem 1.15rem;border:1px solid var(--burgundy);display:inline-block;
+  transition:background .18s ease,color .18s ease,transform .18s cubic-bezier(.16,1,.3,1);
+}
+.btn:active{transform:translateY(1px)}
+.btn--fill{background:var(--burgundy);color:var(--on-burgundy)}
+.btn--fill:hover{background:transparent;color:var(--ink)}
+.btn--line{color:var(--ink)}
+.btn--line:hover{background:var(--burgundy);color:var(--on-burgundy)}
+.band--ink .btn{border-color:var(--on-burgundy)}
+.band--ink .btn--fill{background:var(--on-burgundy);color:var(--burgundy)}
+.band--ink .btn--fill:hover{background:transparent;color:var(--on-burgundy)}
+.band--ink .btn--line{color:var(--on-burgundy)}
+.band--ink .btn--line:hover{background:var(--on-burgundy);color:var(--burgundy)}
+
+.field{position:relative;background:var(--field-bg);aspect-ratio:4/3;width:100%;overflow:hidden}
+@media (min-width:980px){
+  .field{position:absolute;right:0;top:0;height:100%;width:min(49vw,700px);aspect-ratio:auto;clip-path:polygon(15% 0,100% 0,100% 100%,0 100%)}
+}
+.field canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:manipulation}
+.field__cap{
+  position:absolute;left:0;right:0;bottom:0;
+  padding:2.4rem max(14px,env(safe-area-inset-right,0px)) .8rem 1rem;
+  font-family:var(--display);font-size:var(--s1);line-height:1.4;color:#E8D2B5;
+  background:linear-gradient(to top,rgba(50,5,4,.94) 0%,rgba(50,5,4,.86) 55%,rgba(50,5,4,0) 100%);
+}
+.field__cap span{display:block;max-width:46ch}
+.field__cap b{font-weight:700;color:#fff}
+@media (min-width:980px){.field__cap{padding-left:19%;padding-bottom:1.3rem}}
+
+/* ---- result tiles: the pitch, and a jump menu into the studies ---------- */
+.tiles{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:1px;
+  background:var(--rule-soft);border:1px solid var(--rule-soft);margin-bottom:clamp(2.5rem,5vw,4rem);
+}
+@media (min-width:640px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1040px){.tiles{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.tile{
+  background:var(--cream);padding:1.4rem 1.2rem 1.3rem;text-decoration:none;
+  display:flex;flex-direction:column;gap:.5rem;position:relative;
+  transition:background .2s ease;
+}
+.tile:hover,.tile:focus-visible{background:var(--tile)}
+.tile__v{
+  font-family:var(--display);font-weight:900;font-stretch:80%;font-size:var(--stat);
+  line-height:.95;letter-spacing:-.025em;color:var(--burgundy);
+  font-variant-numeric:tabular-nums;display:block;
+}
+.tile__v small{font-size:.46em;font-weight:700;letter-spacing:0;margin-left:.15em}
+.tile__c{font-size:var(--s2);line-height:1.4;margin:0;flex:1}
+.tile__s{font-family:var(--display);font-size:var(--s1);font-weight:600;color:var(--muted);display:flex;justify-content:space-between;gap:.6rem;border-top:1px solid var(--rule-soft);padding-top:.55rem;margin-top:.3rem}
+.tile::after{
+  content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;
+  background:var(--burgundy);transform:scaleX(0);transform-origin:0 50%;
+  transition:transform .3s cubic-bezier(.16,1,.3,1);
+}
+.tile:hover::after,.tile:focus-visible::after{transform:scaleX(1)}
+
+/* ---- study --------------------------------------------------------------- */
+.study{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:1.4rem;
+  padding-block:clamp(2.4rem,4.5vw,3.6rem);border-top:1px solid var(--rule);
+  scroll-margin-top:6rem;
+}
+@media (min-width:900px){
+  .study{grid-template-columns:16rem minmax(0,1fr);gap:3rem}
+  .study__meta{position:sticky;top:7rem;align-self:start}
+}
+.tag{font-family:var(--display);font-size:var(--s1);font-weight:700;display:inline-block;padding:.12rem .5rem;background:var(--burgundy);color:var(--on-burgundy);margin-bottom:.9rem}
+.study__stat{font-family:var(--display);font-weight:900;font-stretch:80%;font-size:var(--stat);line-height:.95;letter-spacing:-.025em;color:var(--burgundy);font-variant-numeric:tabular-nums;display:block}
+.study__stat small{font-size:.46em;font-weight:700;letter-spacing:0;margin-left:.15em}
+.study__statl{font-size:var(--s1);color:var(--muted);line-height:1.4;display:block;margin:.4rem 0 1.1rem;max-width:22rem}
+.study__meta dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:.3rem .8rem;border-top:1px solid var(--rule-soft);padding-top:.8rem}
+.study__meta dt{font-family:var(--display);font-size:var(--s1);font-weight:600;color:var(--muted);white-space:nowrap}
+.study__meta dd{margin:0;font-size:var(--s2);line-height:1.4}
+.study h3{margin-bottom:1.2rem;max-width:24ch}
+
+.slot{margin-bottom:1.3rem;max-width:var(--measure)}
+.slot__k{
+  font-family:var(--display);font-size:var(--s1);font-weight:700;color:var(--burgundy);
+  display:block;margin-bottom:.25rem;
+}
+.slot p{margin:0}
+.slot--result p{font-size:var(--s4);line-height:1.34;font-weight:350}
+
+/* disclosure */
+.disc{border-top:1px solid var(--rule);margin-top:1.6rem;max-width:var(--measure)}
+.disc__btn{
+  width:100%;background:none;border:0;padding:.85rem 0;cursor:pointer;color:var(--ink);
+  font-family:var(--display);font-size:var(--s2);font-weight:700;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;text-align:left;
+}
+.disc__btn:hover{color:var(--burgundy)}
+.disc__btn svg{flex:none;width:14px;height:14px;transition:transform .35s cubic-bezier(.16,1,.3,1)}
+.disc__btn[aria-expanded="true"] svg{transform:rotate(45deg)}
+.disc__body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .42s cubic-bezier(.16,1,.3,1)}
+.disc__btn[aria-expanded="true"] + .disc__body{grid-template-rows:1fr}
+.disc__inner{overflow:hidden;min-height:0}
+.disc__pad{padding-bottom:1.3rem}
+.disc__pad p{max-width:var(--measure)}
+.study__sub{font-family:var(--display);font-size:var(--s2);font-weight:700;display:block;margin-bottom:.3rem}
+.note{border-left:2px solid var(--burgundy);padding-left:1rem;font-size:var(--s2);color:var(--muted);max-width:var(--measure);margin-top:1.5rem}
+.note p:last-child{margin-bottom:0}
+
+figure{margin:1.6rem 0 0;max-width:34rem}
+figcaption{font-size:var(--s1);color:var(--muted);line-height:1.45;margin-top:.6rem}
+.fig svg{display:block;width:100%;height:auto;max-width:100%}
+
+/* ---- publications -------------------------------------------------------- */
+.pubs{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)}
+.pub{border-bottom:1px solid var(--rule)}
+.pub__in{display:grid;grid-template-columns:2.4rem minmax(0,1fr);gap:.4rem 1rem;padding-block:1.5rem}
+@media (min-width:860px){.pub__in{grid-template-columns:2.4rem minmax(0,1fr) 9.5rem;align-items:start}}
+.pub__n{font-family:var(--display);font-weight:700;font-size:var(--s2);font-variant-numeric:tabular-nums;color:var(--muted);padding-top:.22rem}
+.pub__t{font-family:var(--display);font-weight:700;font-stretch:90%;font-size:var(--s4);line-height:1.18;letter-spacing:-.01em;margin:0 0 .5rem;text-wrap:balance}
+.pub__t a{text-decoration:none;background-image:linear-gradient(var(--burgundy),var(--burgundy));background-size:0 1px;background-repeat:no-repeat;background-position:0 100%;transition:background-size .3s ease}
+.pub__t a:hover,.pub__t a:focus-visible{background-size:100% 1px}
+.pub__a{font-size:var(--s2);margin:0 0 .3rem;color:var(--muted)}
+.pub__a b{color:var(--ink);font-weight:600}
+.pub__v{font-size:var(--s2);margin:0}
+.pub__side{grid-column:2;display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.7rem;align-items:flex-start}
+@media (min-width:860px){.pub__side{grid-column:3;margin-top:.22rem;justify-content:flex-end}}
+.lnk{font-family:var(--display);font-size:var(--s1);font-weight:600;text-decoration:none;border-bottom:1px solid var(--rule);padding-bottom:1px}
+.lnk:hover,.lnk:focus-visible{border-bottom-color:var(--burgundy);color:var(--burgundy)}
+.status{font-family:var(--display);font-size:var(--s1);font-weight:700;border:1px solid var(--rule);padding:.1rem .45rem;white-space:nowrap}
+.rights{margin-top:2rem;font-size:var(--s1);line-height:1.55;color:var(--muted);max-width:68ch}
+
+/* ---- ledger -------------------------------------------------------------- */
+.ledger{display:grid;gap:0;border-top:1px solid var(--rule)}
+.row{display:grid;grid-template-columns:minmax(0,1fr);gap:.3rem .5rem;padding-block:1.5rem;border-bottom:1px solid var(--rule)}
+@media (min-width:760px){.row{grid-template-columns:10.5rem minmax(0,1fr);gap:2rem}}
+.row__when{font-family:var(--display);font-size:var(--s2);font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);padding-top:.2rem}
+.row__what h3{font-size:var(--s4);margin-bottom:.2rem}
+.row__where{font-size:var(--s2);color:var(--muted);margin:0 0 .7rem}
+.row__what p{max-width:var(--measure);margin-bottom:0}
+
+/* ---- skills -------------------------------------------------------------- */
+.matrix{display:grid;gap:0;border-top:1px solid var(--rule)}
+.mrow{display:grid;grid-template-columns:minmax(0,1fr);gap:.5rem;padding-block:1.15rem;border-bottom:1px solid var(--rule)}
+@media (min-width:760px){.mrow{grid-template-columns:12rem minmax(0,1fr);gap:2rem;align-items:baseline}}
+.mrow__k{font-family:var(--display);font-size:var(--s2);font-weight:700}
+.mrow__v{font-size:var(--s2);line-height:1.75;margin:0}
+
+/* ---- contact ------------------------------------------------------------- */
+.contact__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:2rem}
+@media (min-width:820px){.contact__grid{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:3.5rem}}
+.mail{font-family:var(--display);font-weight:800;font-stretch:84%;font-size:clamp(1.25rem,.8rem + 2.1vw,2.1rem);letter-spacing:-.018em;line-height:1.12;text-decoration:none;word-break:break-word;display:inline-block;border-bottom:2px solid rgba(232,210,181,.4)}
+.mail:hover{border-bottom-color:var(--on-burgundy)}
+.elsewhere{list-style:none;margin:0;padding:0;display:grid;gap:.1rem}
+.elsewhere li{border-bottom:1px solid rgba(232,210,181,.22)}
+.elsewhere a{display:flex;justify-content:space-between;gap:1rem;align-items:baseline;padding-block:.6rem;text-decoration:none;font-family:var(--display);font-size:var(--s2)}
+.elsewhere a span:last-child{opacity:.72;font-size:var(--s1);text-align:right}
+.elsewhere a:hover{opacity:.72}
+footer{border-top:1px solid rgba(232,210,181,.22);margin-top:2.5rem;padding-top:1.2rem;font-size:var(--s1);opacity:.75}
+
+/* ---- load sequence: the chart draws itself ------------------------------- */
+html.motion h1 .ln > span{animation:rise .85s cubic-bezier(.16,1,.3,1) both}
+html.motion h1 .ln:nth-child(2) > span{animation-delay:.08s}
+html.motion h1 .ln:nth-child(3) > span{animation-delay:.16s}
+html.motion .hero__in .lede{animation:fade .7s ease .3s both}
+html.motion .hero__in .soundings{animation:fade .7s ease .42s both}
+html.motion .hero__in .actions{animation:fade .7s ease .54s both}
+html.motion .field{animation:wipe .9s cubic-bezier(.16,1,.3,1) both}
+@keyframes rise{from{transform:translateY(102%)}to{transform:translateY(0)}}
+@keyframes fade{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+@keyframes wipe{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}}
+@media (min-width:980px){
+  html.motion .field{animation:wipeSlash 1s cubic-bezier(.16,1,.3,1) both}
+  @keyframes wipeSlash{from{clip-path:polygon(100% 0,100% 0,100% 100%,100% 100%)}to{clip-path:polygon(15% 0,100% 0,100% 100%,0 100%)}}
+}
+@media (prefers-reduced-motion:reduce){
+  html.motion *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav__in">
+    <a class="nav__name" href="#top">Bharath Vedantha Desikan</a>
+    <ul class="nav__links">
+      <li><a href="#research">Research</a></li>
+      <li><a href="#publications">Publications</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="toggle" id="themeToggle" type="button" aria-pressed="false">Dark</button>
+  </div>
+  <div class="nav__prog" aria-hidden="true"><i></i></div>
+</nav>
+
+<header class="band hero" id="top">
+  <div class="hero__in">
+    <div>
+      <h1>
+        <span class="ln"><span>Bharath</span></span>
+        <span class="ln"><span>Vedantha</span></span>
+        <span class="ln"><span>Desikan</span></span>
+      </h1>
+      <p class="lede">Perception and planning for aerial and aquatic robots, where the pose is an estimate and the compute budget is fixed.</p>
+
+      <div class="soundings">
+        <div><span class="sounding__v" data-count="4">4</span><span class="sounding__l">publications and a thesis</span></div>
+        <div><span class="sounding__v" data-count="2000">2,000</span><span class="sounding__l">field reconstructions</span></div>
+        <div><span class="sounding__v" data-count="60">60</span><span class="sounding__l">unattended flight missions</span></div>
+        <div><span class="sounding__v" data-count="973">973</span><span class="sounding__l">keyframes of logged drift</span></div>
+      </div>
+
+      <div class="actions">
+        <a class="btn btn--fill" href="https://www.proquest.com/openview/b981c363bfc08b87ad07dab5b407ee75/1?pq-origsite=gscholar&amp;cbl=18750&amp;diss=y">Read the thesis</a>
+        <a class="btn btn--line" href="static/cv.pdf" data-asset>Curriculum vitae</a>
+        <a class="btn btn--line" href="static/resume.pdf" data-asset>Résumé</a>
+      </div>
+    </div>
+
+    <div class="field">
+      <canvas id="fieldCanvas" role="img"
+        aria-label="A posterior variance map of a scalar field. Samples are placed where variance is highest, and each recorded position sits slightly off the position the planner asked for."></canvas>
+      <p class="field__cap"><span>Posterior variance over a scalar field. The ring is the position asked for, the cross where it was recorded. <b>Tap the map to place a sample.</b></span></p>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section class="band band--paper" id="research">
+  <div class="wrap">
+    <div class="scale" aria-hidden="true"></div>
+    <h2>Research</h2>
+
+    <div class="tiles">
+      <a class="tile" href="#s-depthvar">
+        <span class="tile__v" data-count="70">70<small>± 4%</small></span>
+        <p class="tile__c">Surface coverage after 48 views, against 40 ± 3% for a tuned orbit.</p>
+        <span class="tile__s"><span>Depth-variance planning</span><span>First author</span></span>
+      </a>
+      <a class="tile" href="#s-doptimal">
+        <span class="tile__v" data-count="4">4</span>
+        <p class="tile__c">Seed views needed before the information gain stops being degenerate.</p>
+        <span class="tile__s"><span>D-optimal planning</span><span>Co-author</span></span>
+      </a>
+      <a class="tile" href="#s-thesis">
+        <span class="tile__v" data-count="2000">2,000</span>
+        <p class="tile__c">Reconstructions isolating what a drifted pose costs a field estimate.</p>
+        <span class="tile__s"><span>M.S. thesis</span><span>Sole author</span></span>
+      </a>
+      <a class="tile" href="#s-asv">
+        <span class="tile__v"><small>under $</small><span data-count="2500">2,500</span></span>
+        <p class="tile__c">The whole vessel: hull, PX4 avionics, sonar and a water-quality sonde.</p>
+        <span class="tile__s"><span>Low-cost ASV</span><span>Co-first author</span></span>
+      </a>
+    </div>
+
+    <!-- 1 ---------------------------------------------------------------- -->
+    <article class="study" id="s-depthvar">
+      <div class="study__meta">
+        <span class="tag">First author</span>
+        <span class="study__stat">70<small>± 4%</small></span>
+        <span class="study__statl">surface coverage after a 48-view mission, meaned over 30 trials</span>
+        <dl>
+          <dt>Venue</dt><dd>IEEE CASE 2026</dd>
+          <dt>Status</dt><dd>Published</dd>
+          <dt>Platform</dt><dd>PX4 quadcopter, Gazebo Harmonic</dd>
+        </dl>
+      </div>
+      <div>
+        <h3>Depth-variance guided next-best-view planning</h3>
+
+        <div class="slot"><span class="slot__k">Problem</span>
+          <p>A drone flying around an object has to decide where to point the camera next. A fixed orbit spends time on surfaces that are already covered and misses whatever the first pass occluded.</p></div>
+
+        <div class="slot slot--result"><span class="slot__k">Result</span>
+          <p>70 ± 4 percent surface coverage against 40 ± 3 percent for a tuned orbit, inside a 420 MB GPU budget, with viewpoint scoring costing 2.5 percent of mission time.</p></div>
+
+        <div class="slot"><span class="slot__k">My part</span>
+          <p>First author. Built the Gazebo simulation with a PX4 quadcopter, implemented the acquisition function, and ran the sixty missions the results rest on.</p></div>
+
+        <figure class="fig">
+          <svg viewBox="0 0 440 150" role="img" aria-labelledby="covT covD">
+            <title id="covT">Surface coverage after 48 views</title>
+            <desc id="covD">Depth-variance planner reaches 70 percent plus or minus 4. Tuned orbit reaches 40 percent plus or minus 3.</desc>
+            <g fill="none" stroke="var(--rule-soft)" stroke-width="1">
+              <line x1="150" y1="18" x2="150" y2="122"/><line x1="222" y1="18" x2="222" y2="122"/>
+              <line x1="294" y1="18" x2="294" y2="122"/><line x1="366" y1="18" x2="366" y2="122"/>
+            </g>
+            <line x1="150" y1="122" x2="438" y2="122" stroke="var(--rule)" stroke-width="1"/>
+            <g font-family="Archivo, sans-serif" font-size="11" fill="var(--muted)">
+              <text x="150" y="138" text-anchor="middle">0</text><text x="222" y="138" text-anchor="middle">25</text>
+              <text x="294" y="138" text-anchor="middle">50</text><text x="366" y="138" text-anchor="middle">75</text>
+              <text x="438" y="138" text-anchor="end">100%</text>
+            </g>
+            <g font-family="Archivo, sans-serif" font-size="12" font-weight="600" fill="var(--ink)">
+              <text x="0" y="42">Depth variance</text><text x="0" y="92">Tuned orbit</text>
+            </g>
+            <rect class="bar" x="150" y="28" width="201.6" height="22" rx="4" fill="var(--burgundy)" data-w="201.6"/>
+            <rect class="bar" x="150" y="78" width="115.2" height="22" rx="4" fill="var(--series-b)" data-w="115.2"/>
+            <g stroke="var(--ink)" stroke-width="1.5" fill="none" opacity=".75">
+              <path d="M340.1 33 v12 M340.1 39 H363.1 M363.1 33 v12"/>
+              <path d="M256.6 83 v12 M256.6 89 H273.8 M273.8 83 v12"/>
+            </g>
+            <g font-family="Archivo, sans-serif" font-size="13" font-weight="700" fill="var(--ink)" style="font-variant-numeric:tabular-nums">
+              <text x="372" y="44">70 ± 4</text><text x="284" y="94">40 ± 3</text>
+            </g>
+          </svg>
+          <figcaption>A voxel counts as covered once it has been seen from two distinct viewpoints on a 5 cm grid.</figcaption>
+        </figure>
+
+        <div class="disc">
+          <button class="disc__btn" type="button" aria-expanded="false" aria-controls="d1">
+            <span>Method and detail</span>
+            <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+          </button>
+          <div class="disc__body" id="d1"><div class="disc__inner"><div class="disc__pad">
+            <p><span class="study__sub">The method</span>The reconstruction is 3D Gaussian Splatting, and the renderer carries arbitrary per-Gaussian channels, so depth and depth squared pass through it together. One render then returns the mean depth and the second moment along every ray, and the difference between them is a per-pixel variance: the disagreement among the surfaces the model believes might be there. Accumulated opacity, the signal normally used, stops being informative once the model has placed something at every pixel. Candidate viewpoints come from a 95-point Fibonacci hemisphere, scored on variance and unseen area, then penalised for angular closeness to the viewpoints already chosen that round, so a batch of four spreads around the object.</p>
+            <p><span class="study__sub">The setup</span>Gazebo Harmonic with a PX4 X500 quadcopter and a 640 × 480 RGB-D gimbal camera, on an RTX 4070 Ti SUPER, with the model capped at 500K Gaussians and trained at 320 × 240. A mission is 4 seed views followed by 11 rounds of 4, for 48 views. Depth variance held about three times the dynamic range of opacity over a mission, while alpha coverage saturated near 0.66 by the third round.</p>
+            <div class="note"><p>The comparison was run at equal training iterations as well as at convergence. The planner trained on all views each round while the baseline used a sliding window of the ten nearest, so a result reported only at convergence would have credited the viewpoint selection with a gain that came from the training schedule.</p></div>
+          </div></div></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 2 ---------------------------------------------------------------- -->
+    <article class="study" id="s-doptimal">
+      <div class="study__meta">
+        <span class="tag">Co-author</span>
+        <span class="study__stat">4</span>
+        <span class="study__statl">azimuthally separated seed views needed to remove the degenerate subspace</span>
+        <dl>
+          <dt>Venue</dt><dd>IEEE CASE 2026</dd>
+          <dt>Status</dt><dd>Published</dd>
+          <dt>Motivation</dt><dd>Planetary sample inspection under communication latency</dd>
+        </dl>
+      </div>
+      <div>
+        <h3>D-optimal next-best-view planning for active Gaussian splatting</h3>
+
+        <div class="slot"><span class="slot__k">Problem</span>
+          <p>Where the round-trip delay is too long for an operator to choose views, the vehicle has to rank candidate viewpoints on its own, before it has seen the images those viewpoints would return.</p></div>
+
+        <div class="slot slot--result"><span class="slot__k">Result</span>
+          <p>Over a fifty-view budget the D-optimal policy kept assigning non-zero gain after geometric coverage had already saturated, which is the behaviour a coverage-driven planner cannot produce.</p></div>
+
+        <div class="slot"><span class="slot__k">My part</span>
+          <p>Co-author, fourth of five. Helped develop the planner and its evaluation, alongside the depth-variance work that followed it.</p></div>
+
+        <div class="disc">
+          <button class="disc__btn" type="button" aria-expanded="false" aria-controls="d2">
+            <span>Method and detail</span>
+            <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+          </button>
+          <div class="disc__body" id="d2"><div class="disc__inner"><div class="disc__pad">
+            <p><span class="study__sub">The method</span>One hundred thousand Gaussians are initialised on a Poisson mesh obtained from an RGB-D survey. Their positions are frozen and only appearance parameters are learned, which makes the model's information content tractable. Viewpoints are then ranked by D-optimal information gain computed from a diagonal Fisher Hessian accumulated over the current training set. Scoring uses only the candidate pose and the current model, so the image at that pose is not needed in advance.</p>
+            <p><span class="study__sub">The failure it exposed</span>Analysis of the Taylor linearisation underlying the Fisher criterion showed the ranking is reliable only once the model has converged between steps, and that a single seed view leaves an unobserved parameter subspace whose information gain is degenerate. Four azimuthally separated seed views remove that subspace.</p>
+            <div class="note"><p>The mesh prior is what the depth-variance planner later removes. Freezing positions on a Poisson mesh makes the Fisher information well posed, at the cost of an RGB-D survey before the mission and a geometry the planner cannot revise in flight.</p></div>
+          </div></div></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 3 ---------------------------------------------------------------- -->
+    <article class="study" id="s-thesis">
+      <div class="study__meta">
+        <span class="tag">Sole author</span>
+        <span class="study__stat">2,000</span>
+        <span class="study__statl">reconstructions across five fields, two kernels and fifty seeds</span>
+        <dl>
+          <dt>Institution</dt><dd>Arizona State University, 2026</dd>
+          <dt>Advisor</dt><dd>Prof. Jnaneshwar Das</dd>
+          <dt>Status</dt><dd>On ProQuest</dd>
+        </dl>
+      </div>
+      <div>
+        <h3>Field estimation and adaptive sampling under positional uncertainty</h3>
+
+        <div class="slot"><span class="slot__k">Problem</span>
+          <p>Adaptive sampling work generally treats measurement locations as known. An underwater vehicle records each sample against a drifted pose. The value is correct and the coordinate is not.</p></div>
+
+        <div class="slot slot--result"><span class="slot__k">Result</span>
+          <p>Drift raised reconstruction error on every field, worst on the fields otherwise easiest to reconstruct, and the estimator hid it: marginal-likelihood fitting absorbed the corruption by raising the noise term instead of correcting the model, so the fault reaches the output disguised as measurement noise.</p></div>
+
+        <div class="slot"><span class="slot__k">My part</span>
+          <p>Sole author, advised by Prof. Jnaneshwar Das. Calibrated the drift model, built the simulation study and ran all 2,000 reconstructions.</p></div>
+
+        <figure class="fig">
+          <svg viewBox="0 0 440 206" role="img" aria-labelledby="drT drD">
+            <title id="drT">Commanded survey track against the recorded track</title>
+            <desc id="drD">A lawnmower survey path. The recorded track starts on the commanded track and separates further from it on each successive leg as drift accumulates.</desc>
+            <rect x="1" y="1" width="438" height="158" fill="none" stroke="var(--rule-soft)" stroke-width="1"/>
+            <path class="draw" d="M26 26 H340 V62 H26 V98 H340 V134 H26" fill="none" stroke="var(--series-b)" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="draw" d="M26 26 Q184 24 342 32 Q358 49 340 68 Q184 74 22 69 Q8 87 26 105 Q186 112 348 122 Q366 136 342 150 Q186 158 32 150" fill="none" stroke="var(--burgundy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="26" cy="26" r="3.6" fill="var(--burgundy)"/>
+            <path d="M349 134 V150" stroke="var(--ink)" stroke-width="1" opacity=".55" stroke-dasharray="2 2" fill="none"/>
+            <text x="356" y="146" font-family="Archivo, sans-serif" font-size="11" fill="var(--muted)">gap</text>
+            <text x="26" y="18" font-family="Archivo, sans-serif" font-size="11" fill="var(--muted)">start of run</text>
+            <g font-family="Archivo, sans-serif" font-size="12" font-weight="600">
+              <line x1="2" y1="180" x2="26" y2="180" stroke="var(--series-b)" stroke-width="2" stroke-dasharray="5 4"/>
+              <text x="33" y="184" fill="var(--ink)">commanded</text>
+              <line x1="128" y1="180" x2="152" y2="180" stroke="var(--burgundy)" stroke-width="2"/>
+              <text x="159" y="184" fill="var(--ink)">recorded</text>
+            </g>
+            <text x="438" y="184" text-anchor="end" font-family="Archivo, sans-serif" font-size="11" fill="var(--muted)">drift accumulates along the survey</text>
+          </svg>
+          <figcaption>Each sample's value is recorded correctly against a position that has drifted, and the separation grows through the run.</figcaption>
+        </figure>
+
+        <div class="disc">
+          <button class="disc__btn" type="button" aria-expanded="false" aria-controls="d3">
+            <span>Method and detail</span>
+            <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+          </button>
+          <div class="disc__body" id="d3"><div class="disc__inner"><div class="disc__pad">
+            <p><span class="study__sub">The method</span>The localisation error was characterised first, from a logged visual-odometry run of 973 keyframes. The drift is an accumulating, temporally correlated process, distinct from independent pose noise, and it grows about two and a half times faster where the camera loses features over open water. A one-parameter random walk calibrated to that run reproduced both the magnitude and the temporal structure. Five synthetic temperature fields were then reconstructed from a budget-limited survey, under exact positions and under injected drift, with two kernels and with both fixed coverage and variance-based adaptive sampling.</p>
+            <p><span class="study__sub">What governs it</span>The additional error concentrated where the field gradient is steep, and it approached a floor that further samples did not breach. At fixed magnitude the temporal correlation of the drift mattered little next to the magnitude itself. The governing quantity is the product of the squared field gradient with the covariance of the positional error.</p>
+            <div class="note"><p>Variance-based adaptive sampling gained only marginally over a fixed coverage raster. Maximum-variance selection under a stationary kernel behaves much like uniform coverage, and the sampler itself reads the corrupted pose. Weighting samples by logged pose covariance recovered a modest fraction of the lost accuracy, largest on sharp-structured fields.</p></div>
+          </div></div></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 4 ---------------------------------------------------------------- -->
+    <article class="study" id="s-asv">
+      <div class="study__meta">
+        <span class="tag">Co-first author</span>
+        <span class="study__stat"><small>under $</small>2,500</span>
+        <span class="study__statl">for the whole vessel, sonar and multi-probe sonde included</span>
+        <dl>
+          <dt>Venue</dt><dd>IEEE ICRA 2025 Workshop on Robots in the Wild</dd>
+          <dt>Status</dt><dd>Published</dd>
+          <dt>Site</dt><dd>Tempe Town Lake, Arizona</dd>
+        </dl>
+      </div>
+      <div>
+        <h3>Low-cost ASV for aquatic field reconstruction</h3>
+
+        <div class="slot"><span class="slot__k">Problem</span>
+          <p>Mapping a lake's water quality normally means a crewed boat and manual sampling, which is slow, expensive and sparse. The measurements that result are too thin to resolve local structure.</p></div>
+
+        <div class="slot slot--result"><span class="slot__k">Result</span>
+          <p>An autonomous vessel costing under US$2,500 reconstructed temperature and water-quality fields from a single survey, and a non-stationary Matérn kernel preserved local peaks that stationary kernels smoothed away, concentrating uncertainty on the structure that was actually undersampled.</p></div>
+
+        <div class="slot"><span class="slot__k">My part</span>
+          <p>Co-first author, equal contribution. Owned the sensing and data path: registering each measurement to the navigation solution, checking timing and completeness across sensors, and deciding which records were admitted to the analysis.</p></div>
+
+        <figure class="fig">
+          <svg viewBox="0 0 440 160" role="img" aria-labelledby="cdT cdD">
+            <title id="cdT">Sonde cast profile</title>
+            <desc id="cdD">The winch lowers the sonde in one-metre steps and dwells at each depth before descending again.</desc>
+            <line x1="0" y1="14" x2="440" y2="14" stroke="var(--rule)" stroke-width="1"/>
+            <text x="0" y="10" font-family="Archivo, sans-serif" font-size="11" fill="var(--muted)">surface</text>
+            <path class="draw" d="M34 14 H84 V34 H134 V54 H184 V74 H234 V94 H284 V114 H334 V134 H404" fill="none" stroke="var(--burgundy)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+            <g fill="var(--burgundy)">
+              <circle cx="84" cy="34" r="3.2"/><circle cx="134" cy="54" r="3.2"/><circle cx="184" cy="74" r="3.2"/>
+              <circle cx="234" cy="94" r="3.2"/><circle cx="284" cy="114" r="3.2"/><circle cx="334" cy="134" r="3.2"/>
+            </g>
+            <g font-family="Archivo, sans-serif" font-size="11" fill="var(--muted)" style="font-variant-numeric:tabular-nums">
+              <text x="92" y="31">1 m</text><text x="142" y="51">2 m</text><text x="192" y="71">3 m</text>
+              <text x="242" y="91">4 m</text><text x="292" y="111">5 m</text><text x="342" y="131">6 m</text>
+            </g>
+            <text x="440" y="155" text-anchor="end" font-family="Archivo, sans-serif" font-size="11" fill="var(--muted)">time through the cast</text>
+          </svg>
+          <figcaption>One sonde cast. The winch holds at each one-metre step long enough for the probes to settle, so every depth carries a dwell rather than a reading taken in transit.</figcaption>
+        </figure>
+
+        <div class="disc">
+          <button class="disc__btn" type="button" aria-expanded="false" aria-controls="d4">
+            <span>Method and detail</span>
+            <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+          </button>
+          <div class="disc__body" id="d4"><div class="disc__inner"><div class="disc__pad">
+            <p><span class="study__sub">The platform</span>The R/V Karin Valentine, a low size, weight and power surface vessel built in the DREAMS Lab, running a Pixhawk flight controller on PX4 with an ODROID companion computer for ROS 2. The payload is a 1-D sonar for depth and a multi-probe water-quality sonde on a motorised winch, which descends in one-metre steps and dwells at each depth.</p>
+            <p><span class="study__sub">The method</span>Scalar fields were reconstructed from a lawnmower survey by Gaussian process regression, comparing squared-exponential and Matérn kernels against a non-stationary Matérn whose local length-scale matrix varies with position. Hyperparameters were fit by maximising the log marginal likelihood with a Cholesky factorisation of the covariance, and the maps were written into a DeepGIS and Folium stack so posterior mean and uncertainty could be inspected as planning products.</p>
+            <div class="note"><p>The recurring problem was deciding which observations were usable. The sonde, the sonar and the navigation estimate each degraded differently on open water, so admission to the analysis had to be defined per sensor rather than per timestamp.</p></div>
+          </div></div></div>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="band" id="publications">
+  <div class="wrap">
+    <div class="scale" aria-hidden="true"></div>
+    <h2>Publications</h2>
+
+    <ol class="pubs">
+      <li class="pub"><div class="pub__in">
+        <div class="pub__n">4</div>
+        <div>
+          <h3 class="pub__t"><a href="https://ieeexplore.ieee.org/abstract/document/11704184">Depth-Variance Guided Next-Best-View Planning for Active 3D Gaussian Splatting Reconstruction</a></h3>
+          <p class="pub__a"><b>B. Vedantha Desikan</b>, R. Staggers Jr., K. Prashar, C. Torre, J. Das</p>
+          <p class="pub__v">IEEE International Conference on Automation Science and Engineering, 2026</p>
+        </div>
+        <div class="pub__side">
+          <span class="status">Published</span>
+          <a class="lnk" href="https://ieeexplore.ieee.org/abstract/document/11704184">IEEE Xplore</a>
+          <a class="lnk" href="static/case-paper.pdf" data-asset>PDF</a>
+        </div>
+      </div></li>
+
+      <li class="pub"><div class="pub__in">
+        <div class="pub__n">3</div>
+        <div>
+          <h3 class="pub__t"><a href="https://ieeexplore.ieee.org/abstract/document/11704512">Active Gaussian Splatting for Autonomous Reconstruction Using D-Optimal Next Best View Planning</a></h3>
+          <p class="pub__a">K. Prashar, C. Torre, R. Staggers Jr., <b>B. Vedantha Desikan</b>, J. Das</p>
+          <p class="pub__v">IEEE International Conference on Automation Science and Engineering, 2026</p>
+        </div>
+        <div class="pub__side">
+          <span class="status">Published</span>
+          <a class="lnk" href="https://ieeexplore.ieee.org/abstract/document/11704512">IEEE Xplore</a>
+        </div>
+      </div></li>
+
+      <li class="pub"><div class="pub__in">
+        <div class="pub__n">2</div>
+        <div>
+          <h3 class="pub__t"><a href="https://www.proquest.com/openview/b981c363bfc08b87ad07dab5b407ee75/1?pq-origsite=gscholar&amp;cbl=18750&amp;diss=y">Field Estimation and Adaptive Sampling under Positional Uncertainty</a></h3>
+          <p class="pub__a"><b>B. Vedantha Desikan</b>, advised by Prof. Jnaneshwar Das</p>
+          <p class="pub__v">M.S. thesis, Arizona State University, 2026</p>
+        </div>
+        <div class="pub__side">
+          <span class="status">Thesis</span>
+          <a class="lnk" href="https://www.proquest.com/openview/b981c363bfc08b87ad07dab5b407ee75/1?pq-origsite=gscholar&amp;cbl=18750&amp;diss=y">ProQuest</a>
+        </div>
+      </div></li>
+
+      <li class="pub"><div class="pub__in">
+        <div class="pub__n">1</div>
+        <div>
+          <h3 class="pub__t"><a href="static/icra-paper.pdf" data-asset>Low Cost ASV for High-Resolution Spatio-Temporal Aquatic Field Reconstruction via Dynamic Kernels</a></h3>
+          <p class="pub__a">R. Staggers Jr.*, <b>B. Vedantha Desikan</b>*, J. Das &nbsp;— &nbsp;*equal contribution</p>
+          <p class="pub__v">IEEE ICRA 2025 Workshop on Robots in the Wild</p>
+        </div>
+        <div class="pub__side">
+          <span class="status">Published</span>
+          <a class="lnk" href="static/icra-paper.pdf" data-asset>PDF</a>
+        </div>
+      </div></li>
+    </ol>
+
+    <p class="rights">© 2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting or republishing this material for advertising or promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works. The manuscripts posted here are the accepted versions; the published versions of record are on IEEE Xplore at the links above.</p>
+  </div>
+</section>
+
+<section class="band band--paper" id="experience">
+  <div class="wrap">
+    <div class="scale" aria-hidden="true"></div>
+    <h2>Experience</h2>
+    <div class="ledger">
+      <div class="row">
+        <div class="row__when">Jun – Jul 2026</div>
+        <div class="row__what">
+          <h3>Research aide, robotics perception and simulation</h3>
+          <p class="row__where">NASA STTR, DREAMS Lab, Arizona State University, Tempe</p>
+          <p>Built ROS 2 simulation frameworks with a coral-reef environment, Reef World, for testing and validating autonomous underwater vehicle operations. Developed perception pipelines using visual-inertial odometry for GPS-denied localisation, and modelled positional drift and sensor-fusion behaviour under realistic underwater conditions.</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row__when">Jan – Jun 2024</div>
+        <div class="row__what">
+          <h3>Research intern</h3>
+          <p class="row__where">Shimono Laboratory, Yokohama National University, Japan</p>
+          <p>Designed and implemented a ROS 2 framework for bilateral teleoperation of Universal Robots manipulators, giving real-time force feedback between leader and follower arms. Built the full stack of nodes, controllers and communication, then tuned the control loops for stability and transparency and validated them under communication delay.</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row__when">May – Jun 2023</div>
+        <div class="row__what">
+          <h3>ROS 2 intern</h3>
+          <p class="row__where">ROBIS, Motherson Group, India</p>
+          <p>Worked on motion planning and control system design for an automated guided vehicle moving from PLC-based automation to ROS 2. Integrated LiDAR with ROS 2 for SLAM-based mapping, generating the occupancy maps used for autonomous navigation on a factory floor.</p>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:clamp(2.5rem,5vw,4rem)">Education</h2>
+    <div class="ledger">
+      <div class="row">
+        <div class="row__when">2024 – 2026</div>
+        <div class="row__what">
+          <h3>M.S. Robotics and Autonomous Systems</h3>
+          <p class="row__where">Arizona State University &nbsp;&nbsp; GPA 3.74 / 4.00</p>
+          <p>Coursework in linear system theory, robotic systems, multi-robot systems, space robotics and AI, game-theoretic models, and statistical machine learning.</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row__when">2020 – 2024</div>
+        <div class="row__what">
+          <h3>B.Tech. Mechatronics and Automation</h3>
+          <p class="row__where">Vellore Institute of Technology, Chennai</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="skills">
+  <div class="wrap">
+    <div class="scale" aria-hidden="true"></div>
+    <h2>Skills</h2>
+    <div class="matrix">
+      <div class="mrow"><div class="mrow__k">Robotics</div><p class="mrow__v">ROS 2, PX4 Autopilot, Gazebo, SLAM, LiDAR mapping, informative path planning, next-best-view planning</p></div>
+      <div class="mrow"><div class="mrow__k">Perception and learning</div><p class="mrow__v">Visual-inertial odometry, Gaussian processes, 3D Gaussian splatting, uncertainty-aware planning, PyTorch, GPyTorch, OpenCV</p></div>
+      <div class="mrow"><div class="mrow__k">Systems</div><p class="mrow__v">Low-SWaP hardware, bandwidth-constrained autonomy, GPS-denied operation</p></div>
+      <div class="mrow"><div class="mrow__k">Tools</div><p class="mrow__v">Python, C++, CUDA, MATLAB, Linux, Docker, Git, LaTeX</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band band--ink" id="contact">
+  <div class="wrap">
+    <div class="scale" aria-hidden="true"></div>
+    <h2>Contact</h2>
+    <div class="contact__grid">
+      <div>
+        <a class="mail" href="mailto:bharathvdesikan@gmail.com">bharathvdesikan@gmail.com</a>
+        <p style="margin-top:1.4rem;max-width:40ch">Open to doctoral positions and research engineering roles in field robotics, perception and planning.</p>
+      </div>
+      <ul class="elsewhere">
+        <li><a href="https://github.com/blazair"><span>GitHub</span><span>blazair</span></a></li>
+        <li><a href="https://www.linkedin.com/in/bharath-vedantha-desikan-67b62a366/"><span>LinkedIn</span><span>bharath-vedantha-desikan</span></a></li>
+        <li><a href="https://scholar.google.com/citations?user=csyafMIAAAAJ&amp;hl=en"><span>Google Scholar</span><span>citations</span></a></li>
+        <li><a href="https://dreams-lab.github.io/"><span>DREAMS Lab</span><span>Arizona State University</span></a></li>
+      </ul>
+    </div>
+    <footer>© 2026 Bharath Vedantha Desikan. Arizona State University, DREAMS Lab.</footer>
+  </div>
+</section>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var root=document.documentElement;
+  var reduce=window.matchMedia("(prefers-reduced-motion: reduce)");
+  var moving=!reduce.matches;
+  if(moving) root.classList.add("motion");
+
+  /* ---- theme: light unless this viewer chose otherwise ------------------ */
+  var btn=document.getElementById("themeToggle");
+  function paint(mode){
+    root.setAttribute("data-theme",mode);
+    btn.textContent = mode==="dark" ? "Light" : "Dark";
+    btn.setAttribute("aria-pressed", mode==="dark" ? "true" : "false");
+  }
+  paint(root.getAttribute("data-theme")==="dark" ? "dark" : "light");
+  btn.addEventListener("click",function(){
+    var next = root.getAttribute("data-theme")==="dark" ? "light" : "dark";
+    try{ localStorage.setItem("bvd-theme",next); }catch(e){}
+    paint(next);
+  });
+
+  /* ---- scroll progress -------------------------------------------------- */
+  var ticking=false;
+  function prog(){
+    ticking=false;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    root.style.setProperty("--prog", h>0 ? Math.min(1,window.scrollY/h).toFixed(4) : "0");
+  }
+  window.addEventListener("scroll",function(){ if(!ticking){ticking=true;requestAnimationFrame(prog);} },{passive:true});
+  window.addEventListener("resize",prog); prog();
+
+  /* ---- disclosures ------------------------------------------------------ */
+  Array.prototype.forEach.call(document.querySelectorAll(".disc__btn"),function(b){
+    b.addEventListener("click",function(){
+      var open=b.getAttribute("aria-expanded")==="true";
+      b.setAttribute("aria-expanded", open ? "false" : "true");
+      b.querySelector("span").textContent = open ? "Method and detail" : "Hide method and detail";
+    });
+  });
+
+  /* ---- counters --------------------------------------------------------- */
+  function countUp(el){
+    var end=parseFloat(el.getAttribute("data-count")), t0=0;
+    var node=el.lastChild && el.lastChild.nodeType===3 ? null : null;
+    var suffix=el.querySelector("small");
+    function write(v){
+      var txt=Math.round(v).toLocaleString("en-US");
+      if(suffix){ el.firstChild.nodeValue=txt; } else { el.textContent=txt; }
+    }
+    function step(t){
+      if(!t0) t0=t;
+      var k=Math.min(1,(t-t0)/950), e=1-Math.pow(1-k,3);
+      write(end*e);
+      if(k<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  function observeOnce(sel,fn,threshold){
+    if(!("IntersectionObserver" in window)) return;
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ io.unobserve(e.target); fn(e.target); } });
+    },{threshold:threshold||.5});
+    Array.prototype.forEach.call(document.querySelectorAll(sel),function(n){ io.observe(n); });
+  }
+  if(moving){
+    observeOnce("[data-count]",function(el){
+      /* the $ tile wraps its digits in a child span */
+      var inner=el.getAttribute("data-count")?el:el.querySelector("[data-count]");
+      countUp(inner);
+    },.6);
+  }
+
+  /* ---- figure bars ------------------------------------------------------ */
+  if(moving){
+    observeOnce(".bar",function(r){
+      var w=parseFloat(r.getAttribute("data-w")), t0=0;
+      r.setAttribute("width","0");
+      function step(t){
+        if(!t0) t0=t;
+        var k=Math.min(1,(t-t0)/1000), e=1-Math.pow(1-k,3);
+        r.setAttribute("width",(w*e).toFixed(1));
+        if(k<1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    },.5);
+  }
+
+  /* ---- figure paths draw themselves ------------------------------------- */
+  if(moving){
+    observeOnce(".draw",function(p){
+      var len;
+      try{ len=p.getTotalLength(); }catch(e){ return; }
+      if(!len) return;
+      var dash=p.getAttribute("stroke-dasharray");
+      p.style.transition="none";
+      p.style.strokeDasharray=len+" "+len;
+      p.style.strokeDashoffset=len;
+      p.getBoundingClientRect();
+      p.style.transition="stroke-dashoffset 1.15s cubic-bezier(.16,1,.3,1)";
+      p.style.strokeDashoffset="0";
+      window.setTimeout(function(){
+        p.style.transition="";p.style.strokeDashoffset="";
+        if(dash) p.style.strokeDasharray=dash; else p.style.strokeDasharray="";
+      },1300);
+    },.4);
+  }
+
+  /* ---------------------------------------------------------------------
+     The field: a Gaussian-process posterior variance map sampled greedily.
+     Each sample is placed at the current maximum of the variance, and the
+     position it is recorded at drifts away from the position asked for,
+     which is the failure the thesis measures. Tapping places one by hand.
+     --------------------------------------------------------------------- */
+  var cv=document.getElementById("fieldCanvas");
+  if(!cv) return;
+  var ctx=cv.getContext("2d");
+  var CELL=15, LS=58, MAXN=30, BANDS=6;
+  var cols=0, rows=0, W=0, H=0, dpr=1;
+  var samples=[], field=null, grow=1, lastAdd=0, phase="run", fadeT=0, held=0;
+
+  function size(){
+    var r=cv.getBoundingClientRect();
+    if(r.width<2||r.height<2) return false;
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    W=r.width; H=r.height;
+    cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    cols=Math.ceil(W/CELL)+1; rows=Math.ceil(H/CELL)+1;
+    field=new Float32Array(cols*rows);
+    return true;
+  }
+  function compute(){
+    for(var i=0;i<field.length;i++) field[i]=1;
+    for(var s=0;s<samples.length;s++){
+      var p=samples[s], w=(s===samples.length-1)?grow:1;
+      if(w<=0) continue;
+      for(var y=0;y<rows;y++) for(var x=0;x<cols;x++){
+        var dx=x*CELL-p.rx, dy=y*CELL-p.ry;
+        field[y*cols+x]*=(1-0.93*Math.exp(-(dx*dx+dy*dy)/(2*LS*LS))*w);
+      }
+    }
+  }
+  function bandOf(v){ var b=Math.floor(v*BANDS); return b<0?0:(b>BANDS-1?BANDS-1:b); }
+  function nextTarget(){
+    var best=-1,bx=0,by=0;
+    for(var y=1;y<rows-1;y++) for(var x=1;x<cols-1;x++){
+      var v=field[y*cols+x]; if(v>best){best=v;bx=x;by=y;}
+    }
+    return {x:bx*CELL+(Math.random()-.5)*CELL, y:by*CELL+(Math.random()-.5)*CELL};
+  }
+  function place(x,y){
+    var n=samples.length, prev=samples[n-1];
+    var ang=prev?prev.ang+(Math.random()-.5)*1.1:Math.random()*6.283;
+    var mag=2+Math.min(n,22)*0.55;
+    samples.push({ax:x,ay:y,rx:x+Math.cos(ang)*mag,ry:y+Math.sin(ang)*mag,ang:ang});
+    if(samples.length>MAXN+10) samples.shift();
+    grow=0;
+  }
+  function addSample(){ var t=nextTarget(); place(t.x,t.y); }
+
+  function draw(alpha){
+    ctx.clearRect(0,0,W,H);
+    ctx.globalAlpha=alpha;
+    for(var y=0;y<rows;y++) for(var x=0;x<cols;x++){
+      ctx.fillStyle="rgba(232,210,181,"+(bandOf(field[y*cols+x])*0.034)+")";
+      ctx.fillRect(x*CELL,y*CELL,CELL+0.6,CELL+0.6);
+    }
+    ctx.strokeStyle="rgba(232,210,181,0.42)"; ctx.lineWidth=1; ctx.beginPath();
+    for(var y2=0;y2<rows;y2++) for(var x2=0;x2<cols;x2++){
+      var b0=bandOf(field[y2*cols+x2]);
+      if(x2+1<cols && bandOf(field[y2*cols+x2+1])!==b0){ ctx.moveTo((x2+1)*CELL,y2*CELL); ctx.lineTo((x2+1)*CELL,(y2+1)*CELL); }
+      if(y2+1<rows && bandOf(field[(y2+1)*cols+x2])!==b0){ ctx.moveTo(x2*CELL,(y2+1)*CELL); ctx.lineTo((x2+1)*CELL,(y2+1)*CELL); }
+    }
+    ctx.stroke();
+    for(var s=0;s<samples.length;s++){
+      var p=samples[s], fresh=(s===samples.length-1)?grow:1;
+      ctx.globalAlpha=alpha*(0.35+0.65*fresh);
+      ctx.strokeStyle="rgba(232,210,181,0.55)"; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.arc(p.ax,p.ay,4.5,0,6.2832); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(p.ax,p.ay); ctx.lineTo(p.rx,p.ry); ctx.stroke();
+      ctx.strokeStyle="rgba(232,210,181,0.95)"; ctx.lineWidth=1.6;
+      ctx.beginPath();
+      ctx.moveTo(p.rx-3.6,p.ry); ctx.lineTo(p.rx+3.6,p.ry);
+      ctx.moveTo(p.rx,p.ry-3.6); ctx.lineTo(p.rx,p.ry+3.6);
+      ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+  }
+
+  var raf=null;
+  function loop(t){
+    raf=requestAnimationFrame(loop);
+    if(!cols) return;
+    if(phase==="run"){
+      if(!lastAdd) lastAdd=t;
+      if(grow<1){ grow=Math.min(1,grow+0.028); compute(); }
+      if(t>held && t-lastAdd>1050){
+        if(samples.length>=MAXN){ phase="fade"; fadeT=t; }
+        else { addSample(); compute(); lastAdd=t; }
+      }
+      draw(1);
+    } else {
+      var k=Math.min(1,(t-fadeT)/1100);
+      draw(1-k);
+      if(k>=1){ samples=[]; grow=1; compute(); phase="run"; lastAdd=t; }
+    }
+  }
+
+  function at(ev){
+    var r=cv.getBoundingClientRect();
+    return {x:(ev.clientX-r.left), y:(ev.clientY-r.top)};
+  }
+  function userPlace(ev){
+    if(!cols) return;
+    var p=at(ev);
+    if(p.x<0||p.y<0||p.x>W||p.y>H) return;
+    if(phase!=="run"){ samples=[]; phase="run"; }
+    place(p.x,p.y); grow=1; compute();
+    held=performance.now()+2600;   /* let the viewer lead for a moment */
+    lastAdd=performance.now();
+    if(!raf) draw(1);
+  }
+  var lastPaint={x:-1e4,y:-1e4};
+  cv.addEventListener("pointerdown",function(ev){ lastPaint=at(ev); userPlace(ev); });
+  cv.addEventListener("pointermove",function(ev){
+    if(ev.pointerType!=="mouse" || ev.buttons!==1) return;
+    var p=at(ev);
+    if(Math.hypot(p.x-lastPaint.x,p.y-lastPaint.y) < 42) return;  /* one sample per stroke segment */
+    lastPaint=p; userPlace(ev);
+  });
+
+  function still(){
+    if(!size()) return;
+    samples=[]; grow=1; compute();
+    for(var i=0;i<18;i++){ addSample(); grow=1; compute(); }
+    draw(1);
+  }
+  function start(){
+    if(!size()) return;
+    if(!moving){ still(); return; }
+    samples=[]; grow=1; lastAdd=0; held=0; phase="run";
+    compute(); addSample(); compute();
+    if(raf) cancelAnimationFrame(raf);
+    raf=requestAnimationFrame(loop);
+  }
+  var rt=null;
+  function onResize(){ clearTimeout(rt); rt=setTimeout(start,180); }
+  if("ResizeObserver" in window) new ResizeObserver(onResize).observe(cv);
+  window.addEventListener("resize",onResize);
+  reduce.addEventListener("change",function(){ moving=!reduce.matches; start(); });
+  document.addEventListener("visibilitychange",function(){
+    if(document.hidden){ if(raf){cancelAnimationFrame(raf);raf=null;} }
+    else if(moving && !raf){ lastAdd=0; raf=requestAnimationFrame(loop); }
+  });
+  if(document.readyState==="complete") start();
+  else window.addEventListener("load",start);
+})();
+</script>
+</body>
+</html>
